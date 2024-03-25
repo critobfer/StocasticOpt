@@ -6,6 +6,7 @@ from pyomo.opt import SolverFactory
 import logging
 import time
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 logger = logging.getLogger()
@@ -43,6 +44,43 @@ def generate_data():
 
     return n, c, d, D, latitudes, longitudes
 
+def read_data(num_nodos, nodeData, demandData):
+    random.seed(100513471)
+
+    # DATA GENERATION
+    n = num_nodos # Number of points
+
+    points_ids = random.sample(range(1, len(nodeData) + 1), n)
+
+    latitudes = []
+    longitudes = []
+    nodes = []
+    d = [random.randint(0,100) for _ in range(n)]
+    i = 0
+    for codnode in points_ids:
+        node = nodeData[nodeData['codnode'] == codnode] 
+        logger.info('We generate data from point ' + str(i))
+        lat = node['latitude'].values[0]
+        latitudes.append(lat)
+        lon = node['longitude'].values[0]
+        longitudes.append(lon)
+        nodes.append([lat, lon])
+        demand = demandData[demandData['codnode'] == 1]['Pallets'].mean()
+        d.append(demand)
+        i+=1
+
+    # Cost matrix, in this case distance
+    D = 40*n
+    c = [[0] * n for _ in range(n)]
+    for i in range(n):
+        for j in range(n):
+            coord_punto_1 = (latitudes[i], longitudes[i])
+            coord_punto_2 = (latitudes[j], longitudes[j])
+            distancia = geodesic(coord_punto_1, coord_punto_2).kilometers
+            c[i][j] = distancia
+        c[i][i] = 1000000
+
+    return n, c, d, D, latitudes, longitudes, nodes
 
 def prize_collecting_TSP(n, c, d, D):
     opt = SolverFactory("gurobi")
@@ -103,7 +141,7 @@ def prize_collecting_TSP(n, c, d, D):
 
     return model, results
 
-def print_solution(model):
+def print_solution(model, n, d):
     capacity_used = 0
     x_sol = np.zeros((n,n))
     u_sol = np.zeros((n))
@@ -130,9 +168,9 @@ def print_solution(model):
     logger.info('We have a total of' + str(num_dec_var) + 'decision varibales')
     logger.info('We have a total of'+ str(num_cons) + 'constraints')
 
-    return x_sol, y_sol, u_sol, capacity_used
+    return x_sol, y_sol, u_sol, capacity_used, opt_value
 
-def graph_solution(x_sol, y_sol, u_sol, capacity_used, latitudes, longitudes):
+def graph_solution(x_sol, y_sol, u_sol, capacity_used, latitudes, longitudes, n):
     current_node = 0
     tour_nodes = ['NOD_' + str(current_node+1)]
     tour = [current_node]
@@ -155,29 +193,38 @@ def graph_solution(x_sol, y_sol, u_sol, capacity_used, latitudes, longitudes):
     tour_coords = coords[tour]
 
     # Plot all coordinates
-    plt.scatter(coords[:, 0], coords[:, 1], color='gray')
-    # Add cost and demand label at each point
-    for i in range(n):
-        plt.text(coords[i, 0] + 0.03, coords[i, 1], f'{d[i]}', color='black', fontsize=8, fontweight='bold')
+    # plt.scatter(coords[:, 0], coords[:, 1], color='gray')
+    # # Add cost and demand label at each point
+    # for i in range(n):
+    #     plt.text(coords[i, 0] + 0.03, coords[i, 1], f'{d[i]}', color='black', fontsize=8, fontweight='bold')
 
-    plt.text(36.1, -3.5, 'used:' + str(capacity_used), color='black', fontsize=15, fontweight='bold')
-    plt.text(36.1, -3.8, 'total:' + str(D), color='black', fontsize=15, fontweight='bold')
+    # plt.text(36.1, -3.5, 'used:' + str(capacity_used), color='black', fontsize=15, fontweight='bold')
+    # plt.text(36.1, -3.8, 'total:' + str(D), color='black', fontsize=15, fontweight='bold')
 
-    plt.plot(tour_coords[:, 0], tour_coords[:, 1], marker='o')
-    # Initial point
-    plt.plot(coords[tour[0], 0], coords[tour[0], 1], marker='x', color='red', markersize=10)
-
-
-
-    plt.title('PC TSP tour (starting in Node 1)')
-    plt.xlabel('Latitud')
-    plt.ylabel('Longitud')
-    plt.show()
+    # plt.plot(tour_coords[:, 0], tour_coords[:, 1], marker='o')
+    # # Initial point
+    # plt.plot(coords[tour[0], 0], coords[tour[0], 1], marker='x', color='red', markersize=10)
 
 
 
-if __name__=="__main__":
-    n, c, d, D, latitudes, longitudes = generate_data()
+    # plt.title('PC TSP tour (starting in Node 1)')
+    # plt.xlabel('Latitud')
+    # plt.ylabel('Longitud')
+    # plt.show()
+    return tour_coords
+
+
+def solve_problem(method, num_nodos, nodeData, demandData):
+    n, c, d, D, latitudes, longitudes, nodes = read_data(num_nodos, nodeData, demandData)
     model, results = prize_collecting_TSP(n, c, d, D)
-    x_sol, y_sol, u_sol, capacity_used = print_solution(model)
-    graph_solution(x_sol, y_sol, u_sol, capacity_used, latitudes, longitudes)
+    x_sol, y_sol, u_sol, capacity_used, opt_value = print_solution(model, n, d)
+    tour_coords = graph_solution(x_sol, y_sol, u_sol, capacity_used, latitudes, longitudes, n)
+
+    return nodes, tour_coords, opt_value
+
+# if __name__=="__main__":
+#     # n, c, d, D, latitudes, longitudes = generate_data()
+#     n, c, d, D, latitudes, longitudes = read_data(20)
+#     model, results = prize_collecting_TSP(n, c, d, D)
+#     x_sol, y_sol, u_sol, capacity_used = print_solution(model)
+#     graph_solution(x_sol, y_sol, u_sol, capacity_used, latitudes, longitudes)
