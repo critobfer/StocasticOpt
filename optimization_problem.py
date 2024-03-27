@@ -54,7 +54,6 @@ def read_data(num_nodos, nodeData, demandData):
 
     latitudes = []
     longitudes = []
-    nodes = []
     d = [random.randint(0,100) for _ in range(n)]
     i = 0
     for codnode in points_ids:
@@ -64,7 +63,6 @@ def read_data(num_nodos, nodeData, demandData):
         latitudes.append(lat)
         lon = node['longitude'].values[0]
         longitudes.append(lon)
-        nodes.append([lat, lon])
         demand = demandData[demandData['codnode'] == 1]['Pallets'].mean()
         d.append(demand)
         i+=1
@@ -80,7 +78,7 @@ def read_data(num_nodos, nodeData, demandData):
             c[i][j] = distancia
         c[i][i] = 1000000
 
-    return n, c, d, D, latitudes, longitudes, nodes
+    return points_ids, c, d, D, latitudes, longitudes
 
 def prize_collecting_TSP(n, c, d, D):
     opt = SolverFactory("gurobi")
@@ -215,12 +213,26 @@ def graph_solution(x_sol, y_sol, u_sol, capacity_used, latitudes, longitudes, n)
 
 
 def solve_problem(method, num_nodos, nodeData, demandData):
-    n, c, d, D, latitudes, longitudes, nodes = read_data(num_nodos, nodeData, demandData)
-    model, results = prize_collecting_TSP(n, c, d, D)
-    x_sol, y_sol, u_sol, capacity_used, opt_value = print_solution(model, n, d)
-    tour_coords = graph_solution(x_sol, y_sol, u_sol, capacity_used, latitudes, longitudes, n)
+    codnodes, c, d, D, latitudes, longitudes= read_data(num_nodos, nodeData, demandData)
+    model, results = prize_collecting_TSP(num_nodos, c, d, D)
+    x_sol, y_sol, u_sol, capacity_used, opt_value = print_solution(model, num_nodos, d)
+    codnodes_achived = [codnodes[i] for i in range(num_nodos) if y_sol[i] == 1]
+    tour_coords = graph_solution(x_sol, y_sol, u_sol, capacity_used, latitudes, longitudes, num_nodos)
 
-    return nodes, tour_coords, opt_value
+    result = {
+        'codnodes_selected': codnodes,
+        'num_nodes':len(codnodes),
+        'codnodes_visited':codnodes_achived,
+        'num_visited':len(codnodes_achived),
+        'total_capacity': D,
+        'capacity_used': capacity_used,
+        'nodes_demand': d,
+        'distance_matrix': c,
+        'optimum_value': opt_value,
+        'tour_coords': tour_coords
+    }
+
+    return result
 
 # if __name__=="__main__":
 #     # n, c, d, D, latitudes, longitudes = generate_data()
