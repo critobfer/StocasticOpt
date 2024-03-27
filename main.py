@@ -20,9 +20,11 @@ st.sidebar.header('Configuration', divider='red')
 nodeData = st.sidebar.file_uploader(":open_file_folder: Node File", type=["csv"])
 if nodeData is not None:
     nodeData = pd.read_csv(nodeData, encoding='latin-1', sep=';')
+    st.session_state["nodeData"] = nodeData
 demandData = st.sidebar.file_uploader(":open_file_folder: Demand File", type=["csv"])
 if demandData is not None:
     demandData = pd.read_csv(demandData, encoding='latin-1', sep=';')
+    st.session_state["demandData"] = demandData
 st.sidebar.divider()
 
 # Drop-down controls and bars
@@ -31,13 +33,15 @@ num_nodes = st.sidebar.slider('Number of points', min_value=3, max_value=40, val
 
 # Optional display of nodes
 if st.sidebar.button('Solve', type='primary', use_container_width=True ):
-    if nodeData is None or demandData is None:
-        st.warning('Please upload both node data and demand data files.')
-    else:
-        with st.spinner('Executing model...'):
-            result = op.solve_problem(method=method, num_nodos=num_nodes, nodeData=nodeData, demandData=demandData)
-            st.session_state["result"] = result
-        st.success('Model executed successfully!')
+    if "nodeData" not in st.session_state or "demandData" not in st.session_state:
+        if "nodeData" not in st.session_state:
+            st.warning('We need a node data file', icon="⚠️")
+        if "demandData" not in st.session_state:
+            st.warning('We need a demand data file', icon="⚠️")
+        st.stop()
+    # Mostrar el spinner
+    with st.spinner('Executing model'):
+        result = op.solve_problem(method=method, num_nodos=num_nodes, nodeData=nodeData, demandData=demandData) 
 
     st.empty()
     st.session_state["result"] = result
