@@ -2,7 +2,7 @@
 import flexpolyline as fp
 import requests
 
-def calculateRouteHERE(coordinates):
+def calculate_route_HERE(coordinates):
     # Funcion que llama a la API de HERE usando una lista de nodos y un tipo de vehiculo.
 
     # Parametros
@@ -24,11 +24,11 @@ def calculateRouteHERE(coordinates):
         via = via + '&via=' + str(point[0]) + ',' + str(point[1])
 
     urlQuery = url + origin + destination + via + '!passThrough=true&return=polyline,summary' + '&apikey=' + hereAPIKey
-    dataRouteResponse = geturl(urlQuery)
+    dataRouteResponse = call_api(urlQuery)
 
     routeInfo = list()
-    coordsList = getCoordinatesListFromHere(dataRouteResponse)
-    # routeDistance, routeTime = getRouteDistanceTimeHere(dataRouteResponse)
+    coordsList = get_coordinates_list_from_here(dataRouteResponse)
+    # routeDistance, routeTime = get_route_distance_time_here(dataRouteResponse)
 
     # formattedDistance = round(routeDistance / 1000, 2)  # FROM M TO KM
     # formattedTime = round((routeTime / 60) / 60, 2)  # FROM SECONDS TO HOURS
@@ -38,7 +38,7 @@ def calculateRouteHERE(coordinates):
     return coordsList
 
 
-def geturl(url):
+def call_api(url):
     # Hace GET al endpoint representado por la url dado hasta que devuelva 200. Despues devuelve un json que representa la respuesta.
     response = requests.get(url)
     while response.status_code != requests.codes.ok:  # para respuesta de json distintas de 200
@@ -48,7 +48,7 @@ def geturl(url):
         
 
 
-def getCoordinatesListFromHere(dataRouteResponse):
+def get_coordinates_list_from_here(dataRouteResponse):
     # Processa la polyline de HERE y la pasa a coordenadas.
     numberOfPolylines = len(dataRouteResponse['routes'][0]['sections'])
     coordsList = list()
@@ -59,7 +59,7 @@ def getCoordinatesListFromHere(dataRouteResponse):
     return coordsList
     
 
-def getRouteDistanceTimeHere(dataRouteResponse):
+def get_route_distance_time_here(dataRouteResponse):
     # Processa la distancia y tiempo de la ruta HERE.
 
     # Parametros

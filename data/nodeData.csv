@@ -77,8 +77,8 @@ codnode;latitude;longitude;ZIPcod;Address;Business
 76;40.47761154;-3.362380028;28804;Vaquero, Calle de Murano, 28801 Alcalá de Henares, España;Vaquero
 77;40.37994003;-3.696700096;28341;Avenida de Córdoba, 33, 28026 Madrid, España;TH Asesores
 78;40.43864059;-3.676189899;28002;Avenida de América, Intercambiador de Avenida de América, 28006 Madrid, España;Intercambiador de Avenida de América
-79;40.42834091;-3.695219994;28010;la pilla, Calle de Almagro, 28010 Madrid, España;la pilla
-80;40.38240293;-3.671771602;28053;Calle Sierra de Contraviesa, 40, 28053 Madrid, España;Farmacia Rocio M. Martín Valle
+79;40.42834091;-3.695219994;28010;la pilla, Calle de Almagro, 28010 Madrid, España;La pilla
+80;40.38240293;-3.671771602;28053;Calle Sierra de Contraviesa, 40, 28053 Madrid, España;Farmacia
 81;40.4299202;-3.705349922;28015;Loterías y Apuestas del Estado, Glorieta de Ruiz Jiménez, 4, 28015 Madrid, España;Loterías y Apuestas del Estado
 82;40.41794968;-3.672810078;28007;Calle de Ibiza, 48, 28009 Madrid, España;Taberna Barullo
 83;40.47595978;-3.687269688;28046;Cuatro Torres, Anillo Distribuidor Cuatro Torres, 28046 Madrid, España;Cuatro Torres Business Area (CTBA)
@@ -160,75 +160,75 @@ codnode;latitude;longitude;ZIPcod;Address;Business
 159;40.27172899;-3.699045203;28906;Nassica, M-50, 28320 Getafe, España;Nassica
 160;40.34178162;-3.847450018;28922;OSLO-X MADRID, Calle Oslo, 28922 Alcorcón, España;OSLO-X MADRID
 161;40.37435913;-3.621340036;28031;Parroquia San Eulogio, Calle de la Peña de Vargas, 10, 28031 Madrid, España;Parroquia San Eulogio
-162;40.426109313965;-3.69669008255;28004;Cruz Blanca, Calle de Santa Teresa, 28004 Madrid, España;Cruz Blanca
-163;40.419628143311;-3.701280117035;28013;Calle del Caballero de Gracia, 1, 28013 Madrid, España;Relieve del Real Oratorio
-164;40.311908721924;-3.728029966354;28902;Calle Madrid, 102, 28902 Getafe, España;Restaurante El Tiempo
-165;40.414699554443;-3.676690101624;28009;Hospital Infantil Universitario del Niño Jesús, Avenida de Menéndez Pelayo, 28009 Madrid, España;Hospital Infantil Universitario del Niño Jesús
-166;40.504291534424;-3.706190109253;28049;Hinori, Avenida del Monasterio de El Escorial, 28049 Madrid, España;Hinori
-167;40.449989318848;-3.691519975662;28046;Edificio Cadagua, Paseo de la Castellana, 28020 Madrid, España;Lateral Castellana 89
-168;40.520671844482;-3.339349985123;28805;unnamed road, 28805 Alcalá de Henares, España;Pérgola
-169;40.369548797607;-0.360444998741;28051;Masico Termos, PR-TE-83 Romería a La Estrella, Mosqueruela, España;Masico Termos
-170;40.451721191406;-3.691440105438;28046;Torre Europa, Paseo de la Castellana, 95, 28020 Madrid, España;Torre Europa
-171;40.43531036377;-3.686290025711;28006;Calle de Serrano, 110, 28006 Madrid, España;Makkila de Serrano
-172;40.447700500488;-3.588020086288;28022;Plenilunio, Calle de Pirra, 28042 Madrid, España;Plenilunio
-173;40.440101623535;-3.716670036316;28003;Paseo de San Francisco de Sales, 7, 28003 Madrid, España;Ferros Café San Francisco de Sales
-174;40.461769104004;-3.438760042191;28850;Manhattan, Calle de Juan Bautista Monegro, 10, 28859 Torrejón de Ardoz, España;Manhattan
-175;40.61988067627;-4.015820026398;28400;Calle Isla de Lobeira, 15, 28400 Collado Villalba, España;El Patio de Tito
-176;40.414169311523;-3.707969903946;28005;Calle de Cuchilleros, 17, 28005 Madrid, España;Restaurante Botín
-177;40.272465718192;-3.697719414389;28906;Nassica, M-50, 28320 Getafe, España;Nassica
-178;40.341781616211;-3.847450017929;28922;OSLO-X MADRID, Calle Oslo, 28922 Alcorcón, España;OSLO-X MADRID
-179;40.447570800781;-3.695230007172;28020;Tiger, Calle de Orense, 28020 Madrid, España;Tiger
-180;40.440811157227;-3.714849948883;28003;Paseo de San Francisco de Sales, 24, 28003 Madrid, España;Pecaditos San Francisco de Sales
-181;40.447570800781;-3.695230007172;28020;Tiger, Calle de Orense, 28020 Madrid, España;Tiger
-182;40.418228149414;-3.702409982681;28013;Ateneo, Calle de la Montera, 22, 28013 Madrid, España;Ateneo
-183;40.426231384277;-3.684370040894;28001;Calle de Hermosilla, 30, 28001 Madrid, España;Ackermann International
-184;40.529880523682;-3.64061999321;28108;Avenida de Bruselas, 31, 28108 Alcobendas, España;Miele Experience Center La Moraleja
-185;40.422218322754;-3.708669900894;28013;Gran Vía, 64, 28013 Madrid, España;Txapela Gran Vía
-186;40.419479370117;-3.705820083618;28013;Rodilla, Plaza de Callao, 28013 Madrid, España;Rodilla
-187;40.435710906982;-0.368827009201;28046;Mosqueruela, Aragón, España;Mosqueruela
-188;40.402781839925;-3.783491885956;28223;Quirón Hospital Universitario, Calle Diego de Velázquez, 1, 28223 Pozuelo de Alarcón, España;Quirón Hospital Universitario
-189;40.370140075684;-3.707469940186;28041;BiciMAD, Calle Gran Avenida, 28041 Madrid, España;BiciMAD
-190;40.403568267822;-3.713579893112;28005;Calle de Toledo, 47, 28005 Madrid, España;Salt In Cake - cinnamon rolls, cheesecakes and cookies
-191;40.454849243164;-3.620739936829;28042;Avenida de los Andes, 22, 28042 Madrid, España;Pastelería Mallorca
-192;40.516639709473;-3.898809909821;28232;Yamato, Calle de Camilo José Cela, 28230 Las Rozas de Madrid, España;Yamato
-193;40.44361114502;-3.785000085831;28224;Avda. Europa - América, Avenida de Europa, 28023 Pozuelo de Alarcón, España;Av.Europa-América
-194;40.41934967041;-3.690639972687;28014;Calle de Alcalá, 54, 28014 Madrid, España;Restaurante Bribón de Madrid
-195;40.496490478516;-3.374900102615;28806;Glorieta de Vicente Aleixandre, 2, 28806 Alcalá de Henares, España;llooly Alcala
-196;40.420639038086;-0.368733000755;28001;Mosqueruela, Aragón, España;Mosqueruela
-197;40.559478759766;-3.617290019989;28703;Calle de Lanzarote, 20, 28702 San Sebastián de los Reyes, España;Tsunami Climb
-198;40.456699371338;-3.474410057068;28850;Avenida de la Constitución, 86, 28850 Torrejón de Ardoz, España;Camino Real
-199;40.419639587402;-0.36988799572;28013;Mosqueruela, Aragón, España;Mosqueruela
-200;40.396060943604;-3.74750995636;28047;Centro Privado de Educación Infantil, Primaria y Secundaria Bienaventurada Virgen María, Calle de Cullera, 17, 28047 Madrid, España;Centro Privado de Educación Infantil
-201;40.534118652344;-3.652450084686;28108;Grupo Restaurantes José Luis, Avenida de la Industria, 35, 28108 Alcobendas, España;Grupo Restaurantes José Luis
-202;40.436870574951;-3.62749004364;28037;Multi Auto, Calle de Alfonso Gómez, 28037 Madrid, España;Multi Auto
-203;40.458690643311;-3.672970056534;28016;Calle de Costa Rica, 15, 28016 Madrid, España;Los Barriletes
-204;40.445980072022;-3.698580026627;28003;La Pocha, Calle de Ponzano, 95, 28003 Madrid, España;La Pocha
-205;40.430431365967;-3.71281003952;28015;Carrefour Market, Calle de Alberto Aguilera, 28015 Madrid, España;Carrefour Market
-206;40.41349029541;-3.750530004501;28011;Centro de BonoParques, Carretera del Albergue Juvenil, 28011 Madrid, España;Centro de BonoParques
-207;40.512180328369;-3.8804500103;28231;Vía de servicio A-6, 28230 Las Rozas de Madrid, España;Vía de servicio A-6
-208;40.455360412598;-3.874469995499;28222;Polígono Industrial El Carralero, Centro Comercial Equinoccio, Calle Fresa, 2, 28222 Majadahonda, España;Polígono Industrial El Carralero
-209;40.479019165039;-3.708260059357;28029;Centro Comercial La Vaguada, Avenida de Monforte de Lemos, 36, 28029 Madrid, España;Centro Comercial La Vaguada
-210;40.434829711914;-3.698240041733;28010;Paseo del General Martínez Campos, 2, 28010 Madrid, España;El Rincón
-211;40.345390319824;-3.827579975128;28921;Calle Mayor, 65, 28922 Alcorcón, España;Cafeteria Napoles II Pizzeria
-212;40.429378509522;-3.702169895172;28004;Goiko Grill, Glorieta de Bilbao, 3, 28004 Madrid, España;Goiko Grill
-213;40.306480407715;-3.865190029144;28938;Enjoy Wellness, Calle de Perseo, 28938 Móstoles, España;Enjoy Wellness
-214;40.342109680176;-3.711940050125;28021;Cafetería Domingo, Calle de Domingo Párraga, 28021 Madrid, España;Cafetería Domingo
-215;40.503330230713;-3.70707988739;28049;El Pescador, Avenida del Monasterio de Silos, 28049 Madrid, España;El Pescador
-216;40.347278594971;-3.815850019455;28924;Kiosko Kaura, Calle de la Paz, 28924 Alcorcón, España;Kiosko Kaura
-217;40.436500549316;-3.667530059814;28028;El Rincón de Jaén IV, Avenida de Camilo José Cela, 28028 Madrid, España;El Rincón de Jaén IV
-218;40.424068450928;-0.367291998863;28009;Mosqueruela, Aragón, España;Mosqueruela
-219;40.449760437012;-3.65106010437;28043;C.C. Arturo Soria Plaza, Calle de Arturo Soria, 126, 28043 Madrid, España;C.C. Arturo Soria Plaza
-220;40.369110107422;-3.609610080719;28051;Beefcious, Avenida Ensanche de Vallecas, 29, 28051 Madrid, España;Beefcious
-221;40.516971588135;-3.89732003212;28230;The Knife, Calle de Juan Ramón Jiménez, 28230 Las Rozas de Madrid, España;The Knife
-222;40.526359558106;-3.651989936829;28108;Carrefour, Carretera de Fuencarral, 28108 Alcobendas, España;Carrefour
-223;40.36157989502;-0.375766992569;28054;Mas de la Parrilla, PR-TE-83 Romería a La Estrella, Mosqueruela, España;Mas de la Parrilla
-224;40.24654006958;-3.773200035095;28981;Midas, Avenida de las Lagunas, 28981 Parla, España;Midas
-225;40.424751281738;-3.678139925003;28001;Burger King, Calle de Goya, 28001 Madrid, España;Burger King
-226;40.464920043945;-3.629889965057;28043;Calle de Mota del Cuervo, 76, 28043 Madrid, España;Cervecería Burgos
-227;40.447570800781;-3.695230007172;28020;Tiger, Calle de Orense, 28020 Madrid, España;Tiger
-228;40.549900054932;-3.65201997757;28100;El Almirez II, Calle Dolores Ibárruri, 28100 Alcobendas, España;El Almirez II
-229;40.427989959717;-3.68626999855;28001;Joyería Perez, Calle de Ayala, 28001 Madrid, España;Joyería Perez
-230;40.501079559326;-3.892139911652;28232;Europolis Sport Center, Calle Oporto, 28230 Las Rozas de Madrid, España;Europolis Sport Center
-231;40.504249572754;-3.707070112228;28049;El Peregrino, Avenida del Monasterio de El Escorial, 24, 28049 Madrid, España;El Peregrino
-232;40.508628845215;-3.66718006134;28050;La Vaca Picada, Paseo de la Tierra de Melide, 28050 Madrid, España;La Vaca Picada
-233;40.305179595947;-3.729909896851;28901;Cervecería Mayor, Calle del Barco, 28901 Getafe, España;Cervecería Mayor
+162;40.42610931;-3.696690083;28004;Cruz Blanca, Calle de Santa Teresa, 28004 Madrid, España;Cruz Blanca
+163;40.41962814;-3.701280117;28013;Calle del Caballero de Gracia, 1, 28013 Madrid, España;Relieve del Real Oratorio
+164;40.31190872;-3.728029966;28902;Calle Madrid, 102, 28902 Getafe, España;Restaurante El Tiempo
+165;40.41469955;-3.676690102;28009;Hospital Infantil Universitario del Niño Jesús, Avenida de Menéndez Pelayo, 28009 Madrid, España;Hospital Infantil Universitario del Niño Jesús
+166;40.50429153;-3.706190109;28049;Hinori, Avenida del Monasterio de El Escorial, 28049 Madrid, España;Hinori
+167;40.44998932;-3.691519976;28046;Edificio Cadagua, Paseo de la Castellana, 28020 Madrid, España;Lateral Castellana 89
+168;40.52067184;-3.339349985;28805;unnamed road, 28805 Alcalá de Henares, España;Pérgola
+169;40.3695488;-0.360444999;28051;Masico Termos, PR-TE-83 Romería a La Estrella, Mosqueruela, España;Masico Termos
+170;40.45172119;-3.691440105;28046;Torre Europa, Paseo de la Castellana, 95, 28020 Madrid, España;Torre Europa
+171;40.43531036;-3.686290026;28006;Calle de Serrano, 110, 28006 Madrid, España;Makkila de Serrano
+172;40.4477005;-3.588020086;28022;Plenilunio, Calle de Pirra, 28042 Madrid, España;Plenilunio
+173;40.44010162;-3.716670036;28003;Paseo de San Francisco de Sales, 7, 28003 Madrid, España;Ferros Café San Francisco de Sales
+174;40.4617691;-3.438760042;28850;Manhattan, Calle de Juan Bautista Monegro, 10, 28859 Torrejón de Ardoz, España;Manhattan
+175;40.61988068;-4.015820026;28400;Calle Isla de Lobeira, 15, 28400 Collado Villalba, España;El Patio de Tito
+176;40.41416931;-3.707969904;28005;Calle de Cuchilleros, 17, 28005 Madrid, España;Restaurante Botín
+177;40.27246572;-3.697719414;28906;Nassica, M-50, 28320 Getafe, España;Nassica
+178;40.34178162;-3.847450018;28922;OSLO-X MADRID, Calle Oslo, 28922 Alcorcón, España;OSLO-X MADRID
+179;40.4475708;-3.695230007;28020;Tiger, Calle de Orense, 28020 Madrid, España;Tiger
+180;40.44081116;-3.714849949;28003;Paseo de San Francisco de Sales, 24, 28003 Madrid, España;Pecaditos San Francisco de Sales
+181;40.4475708;-3.695230007;28020;Tiger, Calle de Orense, 28020 Madrid, España;Tiger
+182;40.41822815;-3.702409983;28013;Ateneo, Calle de la Montera, 22, 28013 Madrid, España;Ateneo
+183;40.42623138;-3.684370041;28001;Calle de Hermosilla, 30, 28001 Madrid, España;Ackermann International
+184;40.52988052;-3.640619993;28108;Avenida de Bruselas, 31, 28108 Alcobendas, España;Miele Experience Center La Moraleja
+185;40.42221832;-3.708669901;28013;Gran Vía, 64, 28013 Madrid, España;Txapela Gran Vía
+186;40.41947937;-3.705820084;28013;Rodilla, Plaza de Callao, 28013 Madrid, España;Rodilla
+187;40.43571091;-0.368827009;28046;Mosqueruela, Aragón, España;Mosqueruela
+188;40.40278184;-3.783491886;28223;Quirón Hospital Universitario, Calle Diego de Velázquez, 1, 28223 Pozuelo de Alarcón, España;Quirón Hospital Universitario
+189;40.37014008;-3.70746994;28041;BiciMAD, Calle Gran Avenida, 28041 Madrid, España;BiciMAD
+190;40.40356827;-3.713579893;28005;Calle de Toledo, 47, 28005 Madrid, España;Salt In Cake - cinnamon rolls, cheesecakes and cookies
+191;40.45484924;-3.620739937;28042;Avenida de los Andes, 22, 28042 Madrid, España;Pastelería Mallorca
+192;40.51663971;-3.89880991;28232;Yamato, Calle de Camilo José Cela, 28230 Las Rozas de Madrid, España;Yamato
+193;40.44361115;-3.785000086;28224;Avda. Europa - América, Avenida de Europa, 28023 Pozuelo de Alarcón, España;Av.Europa-América
+194;40.41934967;-3.690639973;28014;Calle de Alcalá, 54, 28014 Madrid, España;Restaurante Bribón de Madrid
+195;40.49649048;-3.374900103;28806;Glorieta de Vicente Aleixandre, 2, 28806 Alcalá de Henares, España;llooly Alcala
+196;40.42063904;-0.368733001;28001;Mosqueruela, Aragón, España;Mosqueruela
+197;40.55947876;-3.61729002;28703;Calle de Lanzarote, 20, 28702 San Sebastián de los Reyes, España;Tsunami Climb
+198;40.45669937;-3.474410057;28850;Avenida de la Constitución, 86, 28850 Torrejón de Ardoz, España;Camino Real
+199;40.41963959;-0.369887996;28013;Mosqueruela, Aragón, España;Mosqueruela
+200;40.39606094;-3.747509956;28047;Centro Privado de Educación Infantil, Primaria y Secundaria Bienaventurada Virgen María, Calle de Cullera, 17, 28047 Madrid, España;Centro Privado de Educación Infantil
+201;40.53411865;-3.652450085;28108;Grupo Restaurantes José Luis, Avenida de la Industria, 35, 28108 Alcobendas, España;Grupo Restaurantes José Luis
+202;40.43687057;-3.627490044;28037;Multi Auto, Calle de Alfonso Gómez, 28037 Madrid, España;Multi Auto
+203;40.45869064;-3.672970057;28016;Calle de Costa Rica, 15, 28016 Madrid, España;Los Barriletes
+204;40.44598007;-3.698580027;28003;La Pocha, Calle de Ponzano, 95, 28003 Madrid, España;La Pocha
+205;40.43043137;-3.71281004;28015;Carrefour Market, Calle de Alberto Aguilera, 28015 Madrid, España;Carrefour Market
+206;40.4134903;-3.750530005;28011;Centro de BonoParques, Carretera del Albergue Juvenil, 28011 Madrid, España;Centro de BonoParques
+207;40.51218033;-3.88045001;28231;Vía de servicio A-6, 28230 Las Rozas de Madrid, España;Vía de servicio A-6
+208;40.45536041;-3.874469995;28222;Polígono Industrial El Carralero, Centro Comercial Equinoccio, Calle Fresa, 2, 28222 Majadahonda, España;Polígono Industrial El Carralero
+209;40.47901917;-3.708260059;28029;Centro Comercial La Vaguada, Avenida de Monforte de Lemos, 36, 28029 Madrid, España;Centro Comercial La Vaguada
+210;40.43482971;-3.698240042;28010;Paseo del General Martínez Campos, 2, 28010 Madrid, España;El Rincón
+211;40.34539032;-3.827579975;28921;Calle Mayor, 65, 28922 Alcorcón, España;Cafeteria Napoles II Pizzeria
+212;40.42937851;-3.702169895;28004;Goiko Grill, Glorieta de Bilbao, 3, 28004 Madrid, España;Goiko Grill
+213;40.30648041;-3.865190029;28938;Enjoy Wellness, Calle de Perseo, 28938 Móstoles, España;Enjoy Wellness
+214;40.34210968;-3.71194005;28021;Cafetería Domingo, Calle de Domingo Párraga, 28021 Madrid, España;Cafetería Domingo
+215;40.50333023;-3.707079887;28049;El Pescador, Avenida del Monasterio de Silos, 28049 Madrid, España;El Pescador
+216;40.34727859;-3.815850019;28924;Kiosko Kaura, Calle de la Paz, 28924 Alcorcón, España;Kiosko Kaura
+217;40.43650055;-3.66753006;28028;El Rincón de Jaén IV, Avenida de Camilo José Cela, 28028 Madrid, España;El Rincón de Jaén IV
+218;40.42406845;-0.367291999;28009;Mosqueruela, Aragón, España;Mosqueruela
+219;40.44976044;-3.651060104;28043;C.C. Arturo Soria Plaza, Calle de Arturo Soria, 126, 28043 Madrid, España;C.C. Arturo Soria Plaza
+220;40.36911011;-3.609610081;28051;Beefcious, Avenida Ensanche de Vallecas, 29, 28051 Madrid, España;Beefcious
+221;40.51697159;-3.897320032;28230;The Knife, Calle de Juan Ramón Jiménez, 28230 Las Rozas de Madrid, España;The Knife
+222;40.52635956;-3.651989937;28108;Carrefour, Carretera de Fuencarral, 28108 Alcobendas, España;Carrefour
+223;40.3615799;-0.375766993;28054;Mas de la Parrilla, PR-TE-83 Romería a La Estrella, Mosqueruela, España;Mas de la Parrilla
+224;40.24654007;-3.773200035;28981;Midas, Avenida de las Lagunas, 28981 Parla, España;Midas
+225;40.42475128;-3.678139925;28001;Burger King, Calle de Goya, 28001 Madrid, España;Burger King
+226;40.46492004;-3.629889965;28043;Calle de Mota del Cuervo, 76, 28043 Madrid, España;Cervecería Burgos
+227;40.4475708;-3.695230007;28020;Tiger, Calle de Orense, 28020 Madrid, España;Tiger
+228;40.54990005;-3.652019978;28100;El Almirez II, Calle Dolores Ibárruri, 28100 Alcobendas, España;El Almirez II
+229;40.42798996;-3.686269999;28001;Joyería Perez, Calle de Ayala, 28001 Madrid, España;Joyería Perez
+230;40.50107956;-3.892139912;28232;Europolis Sport Center, Calle Oporto, 28230 Las Rozas de Madrid, España;Europolis Sport Center
+231;40.50424957;-3.707070112;28049;El Peregrino, Avenida del Monasterio de El Escorial, 24, 28049 Madrid, España;El Peregrino
+232;40.50862885;-3.667180061;28050;La Vaca Picada, Paseo de la Tierra de Melide, 28050 Madrid, España;La Vaca Picada
+233;40.3051796;-3.729909897;28901;Cervecería Mayor, Calle del Barco, 28901 Getafe, España;Cervecería Mayor

@@ -3,8 +3,9 @@ import numpy as np
 import pandas as pd
 import folium # https://folium.streamlit.app/
 from streamlit_folium import st_folium 
-import optimization_problem as op
+import deterministic as det
 import here
+import os
 
 # @st.cache_data #Takes you cache_resource arguments for machine learning 
 
@@ -29,6 +30,13 @@ st.sidebar.divider()
 
 # Drop-down controls and bars
 method = st.sidebar.selectbox('Select Method', ['Deterministic', 'Multi-scenario', 'Machine Learning'])
+
+# Others parameters for the methods
+if method == 'Multi-scenario':
+    num_scenarios = st.sidebar.number_input('Number of Scenarios', min_value=1, step=1, value=30)
+elif method == 'Machine Learning':
+    ml_options = st.sidebar.selectbox('Machine Learning Options', ['RNNs', 'CNNs', 'Attention Models', 'DNN', 'Ensemble Models', 'Gaussian Processes', 'Hidden Markov Models'])
+
 num_nodes = st.sidebar.slider('Number of points', min_value=3, max_value=40, value=5)
 
 # Optional display of nodes
@@ -40,12 +48,14 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
             st.warning('We need a demand data file', icon="⚠️")
         st.stop()
     # Mostrar el spinner
-    with st.spinner('Executing model'):
-        result = op.solve_problem(method=method, num_nodos=num_nodes, nodeData=nodeData, demandData=demandData) 
-
-    st.empty()
-    st.session_state["result"] = result
-    
+    if method == 'Deterministic':
+        with st.spinner('Executing model'):
+            result = det.execute(num_nodos=num_nodes, nodeData=nodeData, demandData=demandData) 
+        st.empty()
+        st.session_state["result"] = result
+    else:
+        st.warning('We are working on it', icon="🔧")
+        st.stop()
 
 if "result" in st.session_state:
     result = st.session_state["result"]
@@ -81,7 +91,7 @@ if "result" in st.session_state:
             popup=folium.Popup(popup_html, max_width=300),
             icon=folium.Icon(color='red')).add_to(m)
     # Add road paths
-    coordinates = here.calculateRouteHERE(result['tour_coords'])
+    coordinates = here.calculate_route_HERE(result['tour_coords'])
     folium.plugins.AntPath(locations=coordinates, dash_array=[8, 100], delay=800, color='red').add_to(m)
 
     st_data = st_folium(m, width=725)
