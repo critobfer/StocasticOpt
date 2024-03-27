@@ -35,9 +35,7 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
         st.warning('Please upload both node data and demand data files.')
     else:
         with st.spinner('Executing model...'):
-            node_df = pd.read_csv(nodeData, encoding='latin-1', sep=';')
-            demand_df = pd.read_csv(demandData, encoding='latin-1', sep=';')
-            result = op.solve_problem(method=method, num_nodos=num_nodes, nodeData=node_df, demandData=demand_df)
+            result = op.solve_problem(method=method, num_nodos=num_nodes, nodeData=nodeData, demandData=demandData)
             st.session_state["result"] = result
         st.success('Model executed successfully!')
 
