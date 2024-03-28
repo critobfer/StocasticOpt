@@ -1,11 +1,10 @@
 import streamlit as st
-import numpy as np
 import pandas as pd
 import folium # https://folium.streamlit.app/
 from streamlit_folium import st_folium 
 import deterministic as det
 import here
-import os
+import matplotlib.pyplot as plt
 
 # @st.cache_data #Takes you cache_resource arguments for machine learning 
 
@@ -59,15 +58,25 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
 
 if "result" in st.session_state:
     result = st.session_state["result"]
-
     nodeDataSelected = nodeData[nodeData['codnode'].isin(result['codnodes_selected'])]
+    
+    st.header('Stadistics:', divider='red')
 
-    st.write(f'{result['num_visited']} points have been visited')
+    st.markdown(f'{result['num_visited']} points have been visited using {result['capacity_used']} capacity unit')
+
+    # Compute percentages
+    percentage_delivered = (result['num_visited'] / result['num_nodes']) * 100
+    percentage_truck_filling = (result['capacity_used'] / result['total_capacity']) * 100
+
+    # Show Compute percentages
+    st.markdown('**Percentage delivered:** ' + str(round(percentage_delivered,2)) + '%')
+    st.markdown('**Percentage of truck filling:** ' + str(round(percentage_truck_filling,2)) + '%')
+
 
     # Show Objective Function
-    st.write(f'Objective Function: {round(result['optimum_value'],2)}')
+    st.subheader(f'**Objective Function:** {round(result['optimum_value'],2)}')
 
-    m = folium.Map(location=[nodeDataSelected['latitude'].values[0], nodeDataSelected['longitude'].values[0]], zoom_start=10, tiles = "CartoDB Positron")
+    m = folium.Map(location=[nodeDataSelected['latitude'].values.mean(), nodeDataSelected['longitude'].values.mean()], zoom_start=11, tiles = "CartoDB Positron")
     for i in range(result['num_nodes']):
         popup_html = """
         <div style="width: 200px;">
@@ -95,7 +104,6 @@ if "result" in st.session_state:
     folium.plugins.AntPath(locations=coordinates, dash_array=[8, 100], delay=800, color='red').add_to(m)
 
     st_data = st_folium(m, width=725)
-
     st.stop()
 
 ####################################################################################

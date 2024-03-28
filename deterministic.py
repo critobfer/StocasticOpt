@@ -48,7 +48,7 @@ def execute(num_nodos, nodeData, demandData):
     model, results = op.prize_collecting_TSP(num_nodos, c, d, D)
     x_sol, y_sol, u_sol, capacity_used, opt_value = op.feed_solution_variables(model, num_nodos, d)
     codnodes_achived = [codnodes[i] for i in range(num_nodos) if y_sol[i] == 1]
-    tour_coords = op.get_tour_cord(x_sol, y_sol, u_sol, capacity_used, latitudes, longitudes, num_nodos)
+    tour_coords = op.get_tour_cord(x_sol, latitudes, longitudes, num_nodos)
 
     result = {
         'codnodes_selected': codnodes,
