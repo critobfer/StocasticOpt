@@ -5,8 +5,9 @@ from streamlit_folium import st_folium
 from streamlit_extras.dataframe_explorer import dataframe_explorer 
 import here
 import deterministic as det
+import multi_scenario as ms
+import machine_learning as ml
 import here
-import matplotlib.pyplot as plt
 
 # @st.cache_data #Takes you cache_resource arguments for machine learning 
 
@@ -27,18 +28,20 @@ demandData = st.sidebar.file_uploader(":open_file_folder: Demand File", type=["c
 if demandData is not None:
     demandData = pd.read_csv(demandData, encoding='latin-1', sep=';')
     st.session_state["demandData"] = demandData
-st.sidebar.divider()
 
+st.sidebar.subheader('Method', divider='red')
 # Drop-down controls and bars
 method = st.sidebar.selectbox('Select Method', ['Deterministic', 'Multi-scenario', 'Machine Learning'])
 
 # Others parameters for the methods
+st.sidebar.subheader('Parameters', divider='red')
 if method == 'Multi-scenario':
     num_scenarios = st.sidebar.number_input('Number of Scenarios', min_value=1, step=1, value=30)
+    ms_option = st.sidebar.selectbox('Options', ['Maximum expectation', 'Minimum variance', 'Minimum mean squared error', 'Risk aversion'])
 elif method == 'Machine Learning':
-    ml_options = st.sidebar.selectbox('Machine Learning Options', ['RNNs', 'CNNs', 'Attention Models', 'DNN', 'Ensemble Models', 'Gaussian Processes', 'Hidden Markov Models'])
+    ml_option = st.sidebar.selectbox('Machine Learning Options', ['RNNs', 'CNNs', 'Attention Models', 'DNN', 'Ensemble Models', 'Gaussian Processes', 'Hidden Markov Models'])
 
-num_nodes = st.sidebar.slider('Number of points', min_value=3, max_value=40, value=5)
+num_nodes = st.sidebar.slider('Number of points', min_value=3, max_value=40, value=15)
 
 # Optional display of nodes
 if st.sidebar.button('Solve', type='primary', use_container_width=True ):
@@ -54,6 +57,16 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
             result = det.execute(num_nodos=num_nodes, nodeData=nodeData, demandData=demandData) 
         st.empty()
         st.session_state["result"] = result
+    elif method == 'Multi-scenario':
+        st.warning('We are working on it', icon="🔧")
+        st.stop()
+        with st.spinner('Executing model'):
+            result = ms.execute(num_nodos=num_nodes, num_scenarios=num_scenarios, option=ms_option, nodeData=nodeData, demandData=demandData) 
+    elif method == 'Machine Learning':
+        st.warning('We are working on it', icon="🔧")
+        st.stop()
+        with st.spinner('Executing model'):
+            result = ml.execute(num_nodos=num_nodes, option=ml_option, nodeData=nodeData, demandData=demandData) 
     else:
         st.warning('We are working on it', icon="🔧")
         st.stop()

@@ -1,5 +1,4 @@
 import random
-# !pip install geopy
 from geopy.distance import geodesic
 import logging
 import optimization_problem as op
@@ -8,7 +7,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 def read_data(num_nodos, nodeData, demandData):
-    random.seed(10051347)
+    random.seed(100513471)
 
     # DATA GENERATION
     n = num_nodos # Number of points
@@ -43,7 +42,7 @@ def read_data(num_nodos, nodeData, demandData):
 
     return points_ids, c, d, D, latitudes, longitudes
 
-def execute(num_nodos, nodeData, demandData):
+def execute(num_nodos, num_scenarios, option, nodeData, demandData):
     codnodes, c, d, D, latitudes, longitudes= read_data(num_nodos, nodeData, demandData)
     model, results = op.prize_collecting_TSP(num_nodos, c, d, D)
     x_sol, y_sol, u_sol, capacity_used, opt_value = op.feed_solution_variables(model, num_nodos, d)
