@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import folium # https://folium.streamlit.app/
 from streamlit_folium import st_folium 
+from streamlit_extras.dataframe_explorer import dataframe_explorer 
+import here
 import deterministic as det
 import here
 import matplotlib.pyplot as plt
@@ -59,19 +61,9 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
 if "result" in st.session_state:
     result = st.session_state["result"]
     nodeDataSelected = nodeData[nodeData['codnode'].isin(result['codnodes_selected'])]
+    demandDataSelected = demandData[demandData['codnode'].isin(result['codnodes_selected'])]
     
-    st.header('Stadistics:', divider='red')
-
-    st.markdown(f'{result['num_visited']} points have been visited using {result['capacity_used']} capacity unit')
-
-    # Compute percentages
-    percentage_delivered = (result['num_visited'] / result['num_nodes']) * 100
-    percentage_truck_filling = (result['capacity_used'] / result['total_capacity']) * 100
-
-    # Show Compute percentages
-    st.markdown('**Percentage delivered:** ' + str(round(percentage_delivered,2)) + '%')
-    st.markdown('**Percentage of truck filling:** ' + str(round(percentage_truck_filling,2)) + '%')
-
+    st.header('Result:', divider='red')
 
     # Show Objective Function
     st.subheader(f'**Objective Function:** {round(result['optimum_value'],2)}')
@@ -104,6 +96,28 @@ if "result" in st.session_state:
     folium.plugins.AntPath(locations=coordinates, dash_array=[8, 100], delay=800, color='red').add_to(m)
 
     st_data = st_folium(m, width=725)
+
+    st.header('Stadistics:', divider='red')
+
+    st.markdown(f'{result['num_visited']} points have been visited using {result['capacity_used']} capacity unit')
+
+    # Compute percentages
+    percentage_delivered = (result['num_visited'] / result['num_nodes']) * 100
+    percentage_truck_filling = (result['capacity_used'] / result['total_capacity']) * 100
+
+    # Show Compute percentages
+    st.markdown('**Percentage delivered:** ' + str(round(percentage_delivered,2)) + '%')
+    st.markdown('**Percentage of truck filling:** ' + str(round(percentage_truck_filling,2)) + '%')
+
+    st.header('Data:', divider='red')
+    # Show the data 
+    st.subheader('Nodes info:')
+    nodeDataSelected_df = dataframe_explorer(nodeDataSelected, case=False)
+    st.dataframe(nodeDataSelected_df, use_container_width=True)
+    st.subheader('Demand info:')
+    demandDataSelected_df = dataframe_explorer(demandDataSelected, case=False)
+    st.dataframe(demandDataSelected_df, use_container_width=True)
+
     st.stop()
 
 ####################################################################################
