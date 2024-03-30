@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import altair as alt
 import folium # https://folium.streamlit.app/
 from streamlit_folium import st_folium 
 from streamlit_extras.dataframe_explorer import dataframe_explorer 
@@ -7,7 +8,6 @@ import here
 import deterministic as det
 import multi_scenario as ms
 import machine_learning as ml
-import here
 
 # @st.cache_data #Takes you cache_resource arguments for machine learning 
 
@@ -27,6 +27,7 @@ if nodeData is not None:
 demandData = st.sidebar.file_uploader(":open_file_folder: Demand File", type=["csv"])
 if demandData is not None:
     demandData = pd.read_csv(demandData, encoding='latin-1', sep=';')
+    demandData['Date'] = pd.to_datetime(demandData['Date'])
     st.session_state["demandData"] = demandData
 
 st.sidebar.subheader('Method', divider='red')
@@ -92,12 +93,13 @@ if "result" in st.session_state:
             </div>
             <div> 
                 <p style="display: inline-block; width: 15px;"><i class="fa fa-map-marker" style="font-size: 15px;"></i></p>
-                <p style="display: inline-block; margin-left: 5px;"><strong>Coord:</strong> ({latitude}, {longitude})</p>
+                <p style="display: inline-block; margin-left: 5px;"><strong>Node {codnode}:</strong> ({latitude}, {longitude})</p>
             </div>
         </div>
-        """.format(demand=result['nodes_demand'][i],
-                    latitude=round(nodeDataSelected['latitude'].values[i], 3),
-                    longitude=round(nodeDataSelected['longitude'].values[i], 3))
+        """.format(demand=round(result['nodes_demand'][i], 2),
+                    latitude=round(nodeDataSelected['latitude'].values[i], 2),
+                    longitude=round(nodeDataSelected['longitude'].values[i], 2),
+                    codnode=nodeDataSelected['codnode'].values[i])
         # Add Markers
         folium.Marker( [nodeDataSelected['latitude'].values[i], nodeDataSelected['longitude'].values[i]],
             tooltip=nodeDataSelected['Business'].values[i],
@@ -108,6 +110,7 @@ if "result" in st.session_state:
         # We convert into a hasheable in order to use the session
         tour_coords = [tuple(coord) for coord in result['tour_coords']]
         try:
+            i=a #TODO: Quitar
             if ('tour_coords' not in st.session_state) or (tour_coords != st.session_state['tour_coords']):
                 coordinates = here.calculate_route_HERE(tour_coords)
                 st.session_state['tour_coords'] = tour_coords
@@ -122,15 +125,47 @@ if "result" in st.session_state:
 
     st.header('Stadistics:', divider='red')
 
-    st.markdown(f'{result['num_visited']} points have been visited using {round(result['capacity_used'], 2)} capacity unit')
+    st.markdown(f'🚚 Truck with a capacity of **{result['total_capacity']}**')
+    st.markdown(f'**{result['num_visited']}** points have been visited using **{round(result['capacity_used'], 2)}** capacity unit')
 
     # Compute percentages
     percentage_delivered = (result['num_visited'] / result['num_nodes']) * 100
     percentage_truck_filling = (result['capacity_used'] / result['total_capacity']) * 100
+    # Show Compute percentages
+    chart_data = pd.DataFrame(
+        [percentage_delivered, percentage_truck_filling],
+        index = ["% Delivered", "% Truck"]
+    )
+    # Apply data formatting for Altair
+    data = pd.melt(chart_data.reset_index(), id_vars=["index"])
+
+    # Assign colours depending on whether above or below 50 or 75
+    def assign_color(value):
+        if value < 50:
+            return "#FFA07A"  # LightSalmon
+        elif value < 75:
+            return "#FFD700"  # Gold
+        else:
+            return "#98FB98"  # PaleGreen
+
+    data['color'] = data['value'].apply(assign_color)
+
+    # Stacked horizontal bar chart
+    chart = (
+        alt.Chart(data)
+        .mark_bar()
+        .encode(
+            x=alt.X("value", type="quantitative", title=""),
+            y=alt.Y("index", type="nominal", title=""),
+            color=alt.Color("color:N", legend=None, scale=None),
+        )
+    )
+
+    st.altair_chart(chart, use_container_width=True)
 
     # Show Compute percentages
-    st.markdown('**Percentage delivered:** ' + str(round(percentage_delivered,2)) + '%')
-    st.markdown('**Percentage of truck filling:** ' + str(round(percentage_truck_filling,2)) + '%')
+    # st.markdown('**Percentage delivered:** ' + str(round(percentage_delivered,2)) + '%')
+    # st.markdown('**Percentage of truck filling:** ' + str(round(percentage_truck_filling,2)) + '%')
 
     st.header('Data:', divider='red')
     # Show the data 
@@ -138,6 +173,7 @@ if "result" in st.session_state:
     nodeDataSelected_df = dataframe_explorer(nodeDataSelected, case=False)
     st.dataframe(nodeDataSelected_df, use_container_width=True)
     st.subheader('Demand info:')
+    print(demandDataSelected.dtypes)
     demandDataSelected_df = dataframe_explorer(demandDataSelected, case=False)
     st.dataframe(demandDataSelected_df, use_container_width=True)
 
