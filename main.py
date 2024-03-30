@@ -98,21 +98,31 @@ if "result" in st.session_state:
         """.format(demand=result['nodes_demand'][i],
                     latitude=round(nodeDataSelected['latitude'].values[i], 3),
                     longitude=round(nodeDataSelected['longitude'].values[i], 3))
-
         # Add Markers
         folium.Marker( [nodeDataSelected['latitude'].values[i], nodeDataSelected['longitude'].values[i]],
             tooltip=nodeDataSelected['Business'].values[i],
             popup=folium.Popup(popup_html, max_width=300),
             icon=folium.Icon(color='red')).add_to(m)
     # Add road paths
-    coordinates = here.calculate_route_HERE(result['tour_coords'])
-    folium.plugins.AntPath(locations=coordinates, dash_array=[8, 100], delay=800, color='red').add_to(m)
-
+    if result['num_visited'] > 0:
+        # We convert into a hasheable in order to use the session
+        tour_coords = [tuple(coord) for coord in result['tour_coords']]
+        try:
+            if ('tour_coords' not in st.session_state) or (tour_coords != st.session_state['tour_coords']):
+                coordinates = here.calculate_route_HERE(tour_coords)
+                st.session_state['tour_coords'] = tour_coords
+                st.session_state['coordinates'] = coordinates
+            else: 
+                coordinates = st.session_state['coordinates']
+            folium.plugins.AntPath(locations=coordinates, dash_array=[8, 100], delay=800, color='red').add_to(m)
+        except:
+            folium.plugins.AntPath(locations=result['tour_coords'], dash_array=[8, 100], delay=800, color='red').add_to(m)
+            st.warning("Rate limit for HERE service has been reached", icon="⚠️")
     st_data = st_folium(m, width=725)
 
     st.header('Stadistics:', divider='red')
 
-    st.markdown(f'{result['num_visited']} points have been visited using {result['capacity_used']} capacity unit')
+    st.markdown(f'{result['num_visited']} points have been visited using {round(result['capacity_used'], 2)} capacity unit')
 
     # Compute percentages
     percentage_delivered = (result['num_visited'] / result['num_nodes']) * 100
@@ -130,8 +140,6 @@ if "result" in st.session_state:
     st.subheader('Demand info:')
     demandDataSelected_df = dataframe_explorer(demandDataSelected, case=False)
     st.dataframe(demandDataSelected_df, use_container_width=True)
-
-    st.stop()
 
 ####################################################################################
 # os.system('streamlit run c:/Users/ctff0/OneDrive/Escritorio/TFM/StocasticOpt/main.py')

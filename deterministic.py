@@ -17,7 +17,7 @@ def read_data(num_nodos, nodeData, demandData):
 
     latitudes = []
     longitudes = []
-    d = [random.randint(0,100) for _ in range(n)]
+    d = []
     i = 0
     for codnode in points_ids:
         node = nodeData[nodeData['codnode'] == codnode] 
@@ -26,12 +26,12 @@ def read_data(num_nodos, nodeData, demandData):
         latitudes.append(lat)
         lon = node['longitude'].values[0]
         longitudes.append(lon)
-        demand = demandData[demandData['codnode'] == 1]['Pallets'].mean()
+        demand = demandData[demandData['codnode'] == codnode]['Pallets'].mean()
         d.append(demand)
         i+=1
 
     # Cost matrix, in this case distance
-    D = 40*n
+    D = 150*n
     c = [[0] * n for _ in range(n)]
     for i in range(n):
         for j in range(n):

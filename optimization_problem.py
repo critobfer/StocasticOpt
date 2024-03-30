@@ -118,5 +118,3 @@ def get_tour_cord(x_sol, latitudes, longitudes, n):
     tour_coords = coords[tour]
 
     return tour_coords
-
-

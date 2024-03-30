@@ -1,8 +1,8 @@
-# coordinates = calculateRouteHERE(coordinates)
 import flexpolyline as fp
 import requests
+import streamlit as st
 
-def calculate_route_HERE(coordinates):
+def calculate_route_HERE(coordinates: list[tuple[float, float]]):
     # Funcion que llama a la API de HERE usando una lista de nodos y un tipo de vehiculo.
 
     # Parametros
@@ -11,8 +11,8 @@ def calculate_route_HERE(coordinates):
 
     # Devuelve
     # Las coordenadas de la ruta junto a su distancia en KM y su tiempo en horas.
-    
-    hereAPIKey = 'ZmuIUyPPUobvj5-Vate_oFaug3AL7VbwFZX5KX3S9Yc'  # API utilizado para Here
+    # hereAPIKey = 's2U71rkGXO4mXuRQmom6nRYXE01a-KnpHfhy6DRJDXI'  # API utilizado para Here
+    hereAPIKey = 'ZmuIUyPPUobvj5-Vate_oFaug3AL7VbwFZX5KX3S9Yc'
     url = "https://router.hereapi.com/v8/routes?&transportMode=truck"
     origenPoint = coordinates[0]
     origin = '&origin=' + str(origenPoint[0]) + ',' + str(origenPoint[1])  # Punto origen
@@ -22,11 +22,10 @@ def calculate_route_HERE(coordinates):
     for pos in range(1, len(coordinates) - 1): # Trayecto de nodos desde el segundo hasta el penultimo
         point = coordinates[pos]
         via = via + '&via=' + str(point[0]) + ',' + str(point[1])
-
     urlQuery = url + origin + destination + via + '!passThrough=true&return=polyline,summary' + '&apikey=' + hereAPIKey
     dataRouteResponse = call_api(urlQuery)
-
     routeInfo = list()
+
     coordsList = get_coordinates_list_from_here(dataRouteResponse)
     # routeDistance, routeTime = get_route_distance_time_here(dataRouteResponse)
 
@@ -37,15 +36,15 @@ def calculate_route_HERE(coordinates):
     # routeInfo.append(formattedTime)
     return coordsList
 
-
 def call_api(url):
+    st.success('Llamada a la API')
     # Hace GET al endpoint representado por la url dado hasta que devuelva 200. Despues devuelve un json que representa la respuesta.
     response = requests.get(url)
-    while response.status_code != requests.codes.ok:  # para respuesta de json distintas de 200
-        response = requests.get(url)
-    data = response.json()
-    return data
-        
+    if response.status_code != requests.codes.ok:  # para respuesta de json distintas de 200
+        raise Exception
+    else:
+        data = response.json()
+        return data
 
 
 def get_coordinates_list_from_here(dataRouteResponse):
