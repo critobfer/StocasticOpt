@@ -2,11 +2,12 @@ import random
 from geopy.distance import geodesic
 import logging
 import optimization_problem as op
+import numpy as np
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-def read_data(num_nodos, nodeData, demandData):
+def generate_data_scenarios(num_nodos, num_scenarios, nodeData, demandData):
     random.seed(100513471)
 
     # DATA GENERATION
@@ -16,7 +17,8 @@ def read_data(num_nodos, nodeData, demandData):
 
     latitudes = []
     longitudes = []
-    d = [random.randint(0,100) for _ in range(n)]
+    d = [[] for _ in range(num_scenarios)]
+    params_simulation = []
     i = 0
     for codnode in points_ids:
         node = nodeData[nodeData['codnode'] == codnode] 
@@ -25,8 +27,13 @@ def read_data(num_nodos, nodeData, demandData):
         latitudes.append(lat)
         lon = node['longitude'].values[0]
         longitudes.append(lon)
-        demand = demandData[demandData['codnode'] == 1]['Pallets'].mean()
-        d.append(demand)
+        # We generate m scenarios
+        mu = demandData[demandData['codnode'] == codnode]['Pallets'].mean()
+        sigma = demandData[demandData['codnode'] == codnode]['Pallets'].std()
+        params_simulation.append((mu, sigma))
+        sample = np.random.normal(mu, sigma, num_scenarios)
+        for s in range(num_scenarios):
+            d[s].append(sample[s])
         i+=1
 
     # Cost matrix, in this case distance
@@ -40,15 +47,16 @@ def read_data(num_nodos, nodeData, demandData):
             c[i][j] = distancia
         c[i][i] = 1000000
 
-    return points_ids, c, d, D, latitudes, longitudes
+    return points_ids, c, d, D, latitudes, longitudes, params_simulation
 
 def execute(num_nodos, num_scenarios, option, nodeData, demandData):
-    codnodes, c, d, D, latitudes, longitudes= read_data(num_nodos, nodeData, demandData)
-    model, results = op.prize_collecting_TSP(num_nodos, c, d, D)
-    x_sol, y_sol, u_sol, capacity_used, opt_value = op.feed_solution_variables(model, num_nodos, d)
+    codnodes, c, d, D, latitudes, longitudes, params_simulation= generate_data_scenarios(num_nodos, num_scenarios, nodeData, demandData)
+    prob = [1/num_scenarios for _ in range(num_scenarios)]
+    model, results = op.prize_collecting_TSP_multiscenario(num_nodos, c, d, D, num_scenarios, prob, option)
+    x_sol, y_sol, u_sol, capacity_used, opt_value = op.feed_solution_variables_multiscenario(model, num_nodos, num_scenarios, d)
     codnodes_achived = [codnodes[i] for i in range(num_nodos) if y_sol[i] == 1]
     tour_coords = op.get_tour_cord(x_sol, latitudes, longitudes, num_nodos)
-
+    d_array = np.array(d)
     result = {
         'codnodes_selected': codnodes,
         'num_nodes':len(codnodes),
@@ -56,7 +64,10 @@ def execute(num_nodos, num_scenarios, option, nodeData, demandData):
         'num_visited':len(codnodes_achived),
         'total_capacity': D,
         'capacity_used': capacity_used,
-        'nodes_demand': d,
+        'nodes_demand': [np.mean([d_array[s][i] for s in range(num_scenarios)]) for i in range(num_nodos)],
+        'num_scenarios':num_scenarios,
+        'nodes_demand_multiscenario': d,
+        'params_simulations': params_simulation,
         'distance_matrix': c,
         'optimum_value': opt_value,
         'tour_coords': tour_coords

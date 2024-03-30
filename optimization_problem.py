@@ -66,6 +66,103 @@ def prize_collecting_TSP(n, c, d, D):
 
     return model, results
 
+def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities, method: str):
+    opt = SolverFactory("gurobi")
+
+    model = ConcreteModel()
+
+    model.N = RangeSet(1, n) 
+    model.N_reduced = RangeSet(2, n)
+
+    # The next line declares a variable indexed by the set points
+    model.x = Var(model.N, model.N, domain=Binary, bounds=(0, 1))
+    model.u = Var(model.N, domain=NonNegativeReals, bounds=(1, n)) 
+    model.y = Var(model.N, domain=Binary, bounds=(0, 1))
+
+    # Definition of the objective function
+    if method == 'Maximum expectation':
+        '''In this approach, one seeks to maximise the expected or average value of the outcome under uncertainty. 
+        In the context of a stochastic optimisation problem, this means that the objective function is defined to 
+        maximise the weighted sum of the outcomes of each scenario, where the weights are the probabilities of 
+        occurrence of the scenarios. This approach is appropriate when the main objective is to obtain the best 
+        possible average outcome, regardless of the variability in the outcomes.'''
+        def obj_expression(model): 
+            return sum(probabilities[s] * (sum(model.x[i, j] * c[i - 1][j - 1] for j in model.N) +
+                                        (1 - model.y[i]) * d[s][i - 1]) for i in model.N for s in range(num_scenarios))
+        model.OBJ = Objective(rule=obj_expression, sense=minimize) 
+    elif method == 'Minimum variance':
+        '''In this approach, one seeks to minimise the variability or dispersion in the outcomes under uncertainty. 
+        To achieve this, the objective function can be defined to minimise the variance of the outcomes weighted by 
+        the probabilities of the scenarios. Minimising variance implies reducing the dispersion of outcomes compared 
+        to the expectation maximisation approach. This is useful when one wants to minimise uncertainty or variability 
+        in the outcomes.'''
+        def obj_expression(model): 
+            mean = sum(probabilities[s] * (sum(model.x[i, j] * c[i - 1][j - 1] for j in model.N) +
+                                        (1 - model.y[i]) * d[s][i - 1]) for i in model.N for s in range(num_scenarios))
+            var = sum(probabilities[s] * ((sum(model.x[i, j] * c[i - 1][j - 1] for j in model.N) +
+                                        (1 - model.y[i]) * d[s][i - 1] for i in model.N) - mean) ** 2 for s in range(num_scenarios))
+            return var
+        model.OBJ = Objective(rule=obj_expression, sense=minimize) 
+    elif method == 'Minimum mean squared error':
+        '''The mean squared error is a measure of the accuracy of a model relative to the observed data. In a stochastic 
+        optimisation problem, minimising the MSE involves minimising the quadratic difference between the expected outcomes 
+        and the observed outcomes, weighted by the probabilities of the scenarios. This approach is useful when it is 
+        desired to minimise both bias and variability in the results.'''
+        def obj_expression(model): 
+            return sum(probabilities[s] * (sum(model.x[i, j] * c[i - 1][j - 1] for j in model.N) +
+                                        (1 - model.y[i]) * d[s][i - 1]) for i in model.N for s in range(num_scenarios))
+        model.OBJ = Objective(rule=obj_expression, sense=minimize) 
+    else: 
+        '''Risk aversion implies a preference for more certain outcomes over more uncertain outcomes, 
+        even if the uncertain outcomes have a higher profit potential. In the context of a stochastic 
+        optimisation problem, this can be achieved by introducing a utility function that penalises 
+        riskier outcomes. This utility function can be convex or concave, depending on the degree of risk aversion. 
+        This approach is useful when one wants to take into account the risk attitude of the decision-maker.'''
+        def obj_expression(model): 
+            return sum(probabilities[s] * (sum(model.x[i, j] * c[i - 1][j - 1] for j in model.N) +
+                                        (1 - model.y[i]) * d[s][i - 1]) for i in model.N for s in range(num_scenarios))
+        model.OBJ = Objective(rule=obj_expression, sense=minimize) 
+
+
+    # Only once from i
+    def max_once_from_i(model, i): 
+        return sum(model.x[i, j] for j in model.N) <= 1
+    model.max_once_from_i_Constraint = Constraint(model.N, rule=max_once_from_i)
+
+    # Only once from i
+    def visited_or_not(model, i): 
+        return sum(model.x[i, j] for j in model.N) == sum(model.x[j, i] for j in model.N)
+    model.visited_or_not_Constraint = Constraint(model.N, rule=visited_or_not)
+
+    # Only once to j
+    def max_once_to_j(model, j): 
+        return sum(model.x[i, j] for i in model.N) <= 1
+    model.max_once_to_j_Constraint = Constraint(model.N, rule=max_once_to_j)
+
+    # No subtours
+    def no_sub_tours(model, i, j): 
+        return model.u[i] - n * (1 - model.x[i, j]) <= model.u[j] - 1
+    model.no_sub_tours_Constraint = Constraint(model.N, model.N_reduced, rule=no_sub_tours)
+
+    # Visited constraint
+    def visited(model, i): 
+        return sum(model.x[i, j] for j in model.N) == model.y[i]
+    model.visited_Constraint = Constraint(model.N, rule=visited)
+
+    # Max capacity constraint
+    def capacity(model, i, s): 
+        return sum(model.y[i] * d[s][i - 1] for i in model.N) <= D
+    model.capacity_Constraint = Constraint(model.N, range(num_scenarios), rule=capacity)
+
+    start = time.time()
+    results = opt.solve(model, tee=True)
+    end  = time.time()
+    logger.info('######################################################')
+    logger.info('With ' + str(n) + ' points: '+ str(end-start) + 's')
+    logger.info('######################################################')
+
+    return model, results
+
 def feed_solution_variables(model, n, d):
     capacity_used = 0
     x_sol = np.zeros((n,n))
@@ -76,6 +173,36 @@ def feed_solution_variables(model, n, d):
         u_sol[i] = model.u[i+1].value
         if y_sol[i]:
             capacity_used += d[i]
+        for j in range(0,n):
+            x_sol[i,j]=model.x[i+1,j+1].value
+
+    opt_value = model.OBJ()
+
+    for i in range(0, n):
+        u_sol[i] = model.u[i+1].value
+        logger.info('The Node ' + str(i+1) + ' is the ' + str(int(u_sol[i])) + 'th point visited')
+
+    logger.info('The minimum travel cost is ' + str(opt_value))
+
+    num_dec_var = sum(1 for _ in model.component_data_objects(Var))
+    num_cons = sum(1 for _ in model.component_data_objects(Constraint))
+
+    logger.info('We have a total of' + str(num_dec_var) + 'decision varibales')
+    logger.info('We have a total of'+ str(num_cons) + 'constraints')
+
+    return x_sol, y_sol, u_sol, capacity_used, opt_value
+
+def feed_solution_variables_multiscenario(model, n, m, d): #TODO
+    capacity_used = 0
+    d_array = np.array(d)
+    x_sol = np.zeros((n,n))
+    u_sol = np.zeros((n))
+    y_sol = np.zeros((n))
+    for i in range(0, n):
+        y_sol[i] = model.y[i+1].value
+        u_sol[i] = model.u[i+1].value
+        if y_sol[i]:
+            capacity_used += np.mean([d_array[s][i] for s in range(m)])
         for j in range(0,n):
             x_sol[i,j]=model.x[i+1,j+1].value
 

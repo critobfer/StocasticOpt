@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import altair as alt
 import folium # https://folium.streamlit.app/
 from streamlit_folium import st_folium 
@@ -8,6 +9,8 @@ import here
 import deterministic as det
 import multi_scenario as ms
 import machine_learning as ml
+
+st.set_option('deprecation.showPyplotGlobalUse', False)
 
 # @st.cache_data #Takes you cache_resource arguments for machine learning 
 
@@ -59,15 +62,21 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
         st.empty()
         st.session_state["result"] = result
     elif method == 'Multi-scenario':
-        st.warning('We are working on it', icon="🔧")
-        st.stop()
-        with st.spinner('Executing model'):
-            result = ms.execute(num_nodos=num_nodes, num_scenarios=num_scenarios, option=ms_option, nodeData=nodeData, demandData=demandData) 
+        if ms_option == 'Maximum expectation':
+            with st.spinner('Executing model'):
+                result = ms.execute(num_nodos=num_nodes, num_scenarios=num_scenarios, option=ms_option, nodeData=nodeData, demandData=demandData) 
+            st.empty()
+            st.session_state["result"] = result
+        else:
+            st.warning('We are working on it', icon="🔧")
+            st.stop()
     elif method == 'Machine Learning':
         st.warning('We are working on it', icon="🔧")
         st.stop()
         with st.spinner('Executing model'):
             result = ml.execute(num_nodos=num_nodes, option=ml_option, nodeData=nodeData, demandData=demandData) 
+        st.empty()
+        st.session_state["result"] = result
     else:
         st.warning('We are working on it', icon="🔧")
         st.stop()
@@ -123,6 +132,32 @@ if "result" in st.session_state:
             st.warning("Rate limit for HERE service has been reached", icon="⚠️")
     st_data = st_folium(m, width=725)
 
+    if 'nodes_demand_multiscenario' in result.keys():
+        st.header('Simulation info:', divider='red')
+        d_ms = result['nodes_demand_multiscenario']
+        params_simulation = result['params_simulations']
+        combined_data = []
+        mus = []
+        sigmas = []
+        demands = []
+        for i in range(result['num_nodes']):
+            mu, sigma = params_simulation[i]
+            demand, bin = np.histogram(demandDataSelected[demandDataSelected['codnode'] == nodeDataSelected['codnode'].values[i]]['Pallets'].tolist())
+            demands.append(demand)
+            mus.append(mu)
+            sigmas.append(sigma)
+        combined_data.append(('μ',) + tuple(mus))
+        combined_data.append(('σ',) + tuple(sigmas))
+        combined_data.append(('distribution',) + tuple(demands))
+        for s in range(result['num_scenarios']):
+            combined_data.append(('Demand scenario {}'.format(s+1),) + tuple(d_ms[s]))
+        
+        df_ms = pd.DataFrame(combined_data, columns=['Variable'] + ['Node {}'.format(nodeDataSelected['codnode'].values[i]) for i in range(result['num_nodes'])])
+        # Traspose DataFrame
+        df_ms = df_ms.set_index('Variable').T
+        df_ms.index = ['Node {}'.format(nodeDataSelected['codnode'].values[i]) for i in range(result['num_nodes'])]
+        st.dataframe(df_ms, use_container_width=True, column_config={"distribution": st.column_config.BarChartColumn("Demand Distribution", y_min=0, y_max=80),},)
+
     st.header('Stadistics:', divider='red')
 
     st.markdown(f'🚚 Truck with a capacity of **{result['total_capacity']}**')
@@ -171,11 +206,12 @@ if "result" in st.session_state:
     # Show the data 
     st.subheader('Nodes info:')
     nodeDataSelected_df = dataframe_explorer(nodeDataSelected, case=False)
-    st.dataframe(nodeDataSelected_df, use_container_width=True)
+    st.dataframe(nodeDataSelected_df, use_container_width=True, hide_index = True)
     st.subheader('Demand info:')
-    print(demandDataSelected.dtypes)
     demandDataSelected_df = dataframe_explorer(demandDataSelected, case=False)
-    st.dataframe(demandDataSelected_df, use_container_width=True)
+    st.dataframe(demandDataSelected_df, use_container_width=True, hide_index = True)
 
 ####################################################################################
 # os.system('streamlit run c:/Users/ctff0/OneDrive/Escritorio/TFM/StocasticOpt/main.py')
+
+
