@@ -30,7 +30,7 @@ def read_data(num_nodos, nodeData, demandData):
         i+=1
 
     # Cost matrix, in this case distance
-    D = 40*n
+    D = 150*n
     c = [[0] * n for _ in range(n)]
     for i in range(n):
         for j in range(n):

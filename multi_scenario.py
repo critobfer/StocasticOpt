@@ -3,6 +3,7 @@ from geopy.distance import geodesic
 import logging
 import optimization_problem as op
 import numpy as np
+from scipy.stats import lognorm
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -28,16 +29,22 @@ def generate_data_scenarios(num_nodos, num_scenarios, nodeData, demandData):
         lon = node['longitude'].values[0]
         longitudes.append(lon)
         # We generate m scenarios
-        mu = demandData[demandData['codnode'] == codnode]['Pallets'].mean()
-        sigma = demandData[demandData['codnode'] == codnode]['Pallets'].std()
+        demand_node = demandData[demandData['codnode'] == codnode]['Pallets'].values
+        mu = np.mean(demand_node)
+        sigma = np.std(demand_node)
         params_simulation.append((mu, sigma))
-        sample = np.random.normal(mu, sigma, num_scenarios)
+        # TODO: Revisar que no da negativo==> Usamos la lognormal
+        # https://www.probabilidadyestadistica.net/distribucion-lognormal/#grafica-de-la-distribucion-lognormal
+        log_demand = np.log(demand_node)
+        mu_log = np.mean(log_demand)
+        sigma_log = np.std(log_demand)
+        sample = np.random.normal(mu_log, sigma_log, num_scenarios)
         for s in range(num_scenarios):
-            d[s].append(sample[s])
+            d[s].append(np.exp(sample[s]))
         i+=1
 
     # Cost matrix, in this case distance
-    D = 40*n
+    D = 150*n
     c = [[0] * n for _ in range(n)]
     for i in range(n):
         for j in range(n):
