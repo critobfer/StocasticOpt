@@ -96,7 +96,7 @@ def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities,
         the probabilities of the scenarios. Minimising variance implies reducing the dispersion of outcomes compared 
         to the expectation maximisation approach. This is useful when one wants to minimise uncertainty or variability 
         in the outcomes.'''
-        def obj_expression(model): 
+        def obj_expression(model): # TODO: Ya no es lineal
             mean = sum(probabilities[s] * (sum(model.x[i, j] * c[i - 1][j - 1] for j in model.N) +
                                         (1 - model.y[i]) * d[s][i - 1]) for i in model.N for s in range(num_scenarios))
             var = sum(probabilities[s] * (sum(model.x[i, j] * c[i - 1][j - 1] for j in model.N) +
