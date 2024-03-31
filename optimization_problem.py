@@ -99,8 +99,8 @@ def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities,
         def obj_expression(model): 
             mean = sum(probabilities[s] * (sum(model.x[i, j] * c[i - 1][j - 1] for j in model.N) +
                                         (1 - model.y[i]) * d[s][i - 1]) for i in model.N for s in range(num_scenarios))
-            var = sum(probabilities[s] * ((sum(model.x[i, j] * c[i - 1][j - 1] for j in model.N) +
-                                        (1 - model.y[i]) * d[s][i - 1] for i in model.N) - mean) ** 2 for s in range(num_scenarios))
+            var = sum(probabilities[s] * (sum(model.x[i, j] * c[i - 1][j - 1] for j in model.N) +
+                                (1 - model.y[i]) * d[s][i - 1] - mean) ** 2 for i in model.N for s in range(num_scenarios))
             return var
         model.OBJ = Objective(rule=obj_expression, sense=minimize) 
     elif method == 'Minimum mean squared error':

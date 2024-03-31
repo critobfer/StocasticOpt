@@ -62,7 +62,7 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
         st.empty()
         st.session_state["result"] = result
     elif method == 'Multi-scenario':
-        if ms_option == 'Maximum expectation':
+        if ms_option in ['Maximum expectation', 'Minimum variance']:
             with st.spinner('Executing model'):
                 result = ms.execute(num_nodos=num_nodes, num_scenarios=num_scenarios, option=ms_option, nodeData=nodeData, demandData=demandData) 
             st.empty()
@@ -89,7 +89,8 @@ if "result" in st.session_state:
     st.header('Result:', divider='red')
 
     # Show Objective Function
-    st.subheader(f'**Objective Function:** {round(result['optimum_value'],2)}')
+    st.subheader('**Objective Function:**')
+    st.markdown(f'***Distance travelled + Undelivered demand:*** {round(result['optimum_value'],2)}')
 
     m = folium.Map(location=[nodeDataSelected['latitude'].values.mean(), nodeDataSelected['longitude'].values.mean()], zoom_start=11, tiles = "CartoDB Positron")
     for i in range(result['num_nodes']):
