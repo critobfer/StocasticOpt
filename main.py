@@ -81,7 +81,7 @@ method = st.sidebar.selectbox('Select Method', ['Deterministic', 'Multi-scenario
 st.sidebar.subheader('Parameters', divider='red')
 if method == 'Multi-scenario':
     num_scenarios = st.sidebar.number_input('Number of Scenarios', min_value=1, step=1, value=30)
-    ms_option = st.sidebar.selectbox('Options', ['Maximum expectation', 'Risk aversion'])
+    ms_option = st.sidebar.selectbox('Options', ['Maximum expectation', 'Conditional Value at Risk (CVaR)', 'Worst Case Analysis'])
 elif method == 'Machine Learning':
     ml_option = st.sidebar.selectbox('Machine Learning Options', ['RNNs', 'CNNs', 'Attention Models', 'DNN', 'Ensemble Models', 'Gaussian Processes', 'Hidden Markov Models'])
 max_num_nodes = st.sidebar.slider('Max number of points', min_value=3, max_value=40, value=15)
@@ -104,7 +104,7 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
         st.empty()
         st.session_state["result"] = result
     elif method == 'Multi-scenario':
-        if ms_option in ['Maximum expectation', 'Minimum variance']:
+        if ms_option in ['Maximum expectation', 'Conditional Value at Risk (CVaR)']:
             with st.spinner('Executing model'):
                 result = ms.execute(num_scenarios=num_scenarios, option=ms_option, nodeData=nodeDataSelected, demandData=demandDataSelected, realDemand=realDemand) 
             st.empty()

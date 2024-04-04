@@ -66,13 +66,14 @@ def prize_collecting_TSP(n, c, d, D):
 
     return model, results
 
-def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities, method: str):
+def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities, method: str, alpha:float = 0.4):
     opt = SolverFactory("gurobi")
 
     model = ConcreteModel()
 
     model.N = RangeSet(1, n) 
     model.N_reduced = RangeSet(2, n)
+    model.S = RangeSet(1, num_scenarios)
 
     # The next line declares a variable indexed by the set points
     model.x = Var(model.N, model.N, domain=Binary, bounds=(0, 1))
@@ -103,16 +104,37 @@ def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities,
                                 (1 - model.y[i]) * d[s][i - 1] - mean) ** 2 for i in model.N for s in range(num_scenarios))
             return var
         model.OBJ = Objective(rule=obj_expression, sense=minimize) 
-    else: 
+    elif method == 'Conditional Value at Risk (CVaR)':
         '''Risk aversion implies a preference for more certain outcomes over more uncertain outcomes, 
         even if the uncertain outcomes have a higher profit potential. In the context of a stochastic 
         optimisation problem, this can be achieved by introducing a utility function that penalises 
         riskier outcomes. This utility function can be convex or concave, depending on the degree of risk aversion. 
         This approach is useful when one wants to take into account the risk attitude of the decision-maker.'''
+        model.eta = Var(model.S, domain=NonNegativeReals) #cvar auxiliary variable
+        model.PI = Var(model.S) #cvar auxiliary variable
+        model.tita = Var() #cvar auxiliary variable
+
+        #constraint CVaR
+        def cvar_cons(model,s): 
+            return -model.PI[s] + model.tita + model.eta[s] >= 0  
+        model.cvar_cons_cv = Constraint(model.S, rule=cvar_cons)
+
+        #definition of OF per scenario
+        def of_cv_cons(model,s):
+            return model.PI[s] - sum(sum(model.x[i,j]*c[i-1][j-1] for j in model.N) for i in model.N) - sum((1-model.y[i])*d[s-1][i-1] for i in model.N) == 0
+        model.costcv_cons_cons = Constraint(model.S, rule=of_cv_cons)
+
+        def obj_expression(model):
+            return model.tita + (1/(1-alpha))*sum(probabilities[s-1]*model.eta[s] for s in model.S) 
+        
+        model.OBJ = Objective(rule=obj_expression, sense=minimize) 
+    elif method == 'Worst Case Analysis':
         def obj_expression(model): 
             return sum(probabilities[s] * (sum(model.x[i, j] * c[i - 1][j - 1] for j in model.N) +
                                         (1 - model.y[i]) * d[s][i - 1]) for i in model.N for s in range(num_scenarios))
         model.OBJ = Objective(rule=obj_expression, sense=minimize) 
+
+
 
 
     # Only once from i
