@@ -7,14 +7,10 @@ import optimization_problem as op
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-def read_data(num_nodos, nodeData, demandData):
-    random.seed(10051347)
-
+def read_data(nodeData, demandData):
     # DATA GENERATION
-    n = num_nodos # Number of points
-
-    points_ids = random.sample(range(1, len(nodeData) + 1), n)
-
+    points_ids = nodeData['codnode'].values
+    n = len(points_ids)
     latitudes = []
     longitudes = []
     d = []
@@ -26,7 +22,7 @@ def read_data(num_nodos, nodeData, demandData):
         latitudes.append(lat)
         lon = node['longitude'].values[0]
         longitudes.append(lon)
-        demand = demandData[demandData['codnode'] == codnode]['Pallets'].mean()
+        demand = demandData[demandData['codnode'] == codnode]['Pallets'].values[0]
         d.append(demand)
         i+=1
 
@@ -43,10 +39,11 @@ def read_data(num_nodos, nodeData, demandData):
 
     return points_ids, c, d, D, latitudes, longitudes
 
-def execute(num_nodos, nodeData, demandData):
-    codnodes, c, d, D, latitudes, longitudes= read_data(num_nodos, nodeData, demandData)
+def execute(nodeData, realDemand, demandData):
+    num_nodos = len(nodeData)
+    codnodes, c, d, D, latitudes, longitudes= read_data(nodeData, realDemand)
     model, results = op.prize_collecting_TSP(num_nodos, c, d, D)
-    x_sol, y_sol, u_sol, capacity_used, opt_value = op.feed_solution_variables(model, num_nodos, d)
+    x_sol, y_sol, u_sol, capacity_used, opt_value, total_distance = op.feed_solution_variables(model, num_nodos, d, c)
     codnodes_achived = [codnodes[i] for i in range(num_nodos) if y_sol[i] == 1]
     tour_coords = op.get_tour_cord(x_sol, latitudes, longitudes, num_nodos)
 
@@ -57,10 +54,13 @@ def execute(num_nodos, nodeData, demandData):
         'num_visited':len(codnodes_achived),
         'total_capacity': D,
         'capacity_used': capacity_used,
+        'total_distance': total_distance,
         'nodes_demand': d,
         'distance_matrix': c,
         'optimum_value': opt_value,
-        'tour_coords': tour_coords
+        'tour_coords': tour_coords,
+        'nodeDataSelected': nodeData,
+        'demandDataSelected': demandData
     }
 
     return result

@@ -1,14 +1,43 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+from datetime import datetime
 import altair as alt
 import folium # https://folium.streamlit.app/
 from streamlit_folium import st_folium 
 from streamlit_extras.dataframe_explorer import dataframe_explorer 
 import here
+import random
 import deterministic as det
 import multi_scenario as ms
 import machine_learning as ml
+
+def select_execution_data(demandData, nodeData, max_num_nodes, date):
+    random.seed(10051347)
+    codnode_list = list(demandData[demandData['Date'] == date]['codnode'].values)
+    number_nodes = len(codnode_list)
+    if number_nodes > max_num_nodes:
+        codnode_list = random.sample(codnode_list, max_num_nodes)
+    nodeDataModel = nodeData[nodeData['codnode'].isin(codnode_list)]
+    demandDataModel = demandData[(demandData['Date'] < date) & (demandData['codnode'].isin(codnode_list))]
+    realDemand= demandData[(demandData['Date'] == date) & (demandData['codnode'].isin(codnode_list))]
+    return nodeDataModel, demandDataModel, realDemand
+
+month_dict = {
+    1: 'January',
+    2: 'February',
+    3: 'March',
+    4: 'April',
+    5: 'May',
+    6: 'June',
+    7: 'July',
+    8: 'August',
+    9: 'September',
+    10: 'October',
+    11: 'November',
+    12: 'December'
+}
+month_dict_reversed = {value: key for key, value in month_dict.items()}
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
@@ -33,6 +62,17 @@ if demandData is not None:
     demandData['Date'] = pd.to_datetime(demandData['Date'])
     st.session_state["demandData"] = demandData
 
+st.sidebar.subheader('Day we want to solve', divider='red')
+if demandData is not None:
+    year = st.sidebar.selectbox('Select the year', options=[2023, 2024])
+    months = [month_dict[i] for i in list(demandData[demandData['Year'] == year]['Month'].sort_values())]
+    month_name = st.sidebar.select_slider('Select the month', options=months)
+    month = month_dict_reversed[month_name]
+    days = list(demandData[(demandData['Year'] == year) & (demandData['Month'] == month)]['Day'].sort_values())
+    day = st.sidebar.select_slider('Select the day', options=days)
+
+    date = datetime(year, month, day)
+
 st.sidebar.subheader('Method', divider='red')
 # Drop-down controls and bars
 method = st.sidebar.selectbox('Select Method', ['Deterministic', 'Multi-scenario', 'Machine Learning'])
@@ -41,11 +81,10 @@ method = st.sidebar.selectbox('Select Method', ['Deterministic', 'Multi-scenario
 st.sidebar.subheader('Parameters', divider='red')
 if method == 'Multi-scenario':
     num_scenarios = st.sidebar.number_input('Number of Scenarios', min_value=1, step=1, value=30)
-    ms_option = st.sidebar.selectbox('Options', ['Maximum expectation', 'Minimum variance', 'Minimum mean squared error', 'Risk aversion'])
+    ms_option = st.sidebar.selectbox('Options', ['Maximum expectation', 'Risk aversion'])
 elif method == 'Machine Learning':
     ml_option = st.sidebar.selectbox('Machine Learning Options', ['RNNs', 'CNNs', 'Attention Models', 'DNN', 'Ensemble Models', 'Gaussian Processes', 'Hidden Markov Models'])
-
-num_nodes = st.sidebar.slider('Number of points', min_value=3, max_value=40, value=15)
+max_num_nodes = st.sidebar.slider('Max number of points', min_value=3, max_value=40, value=15)
 
 # Optional display of nodes
 if st.sidebar.button('Solve', type='primary', use_container_width=True ):
@@ -55,16 +94,19 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
         if "demandData" not in st.session_state:
             st.warning('We need a demand data file', icon="⚠️")
         st.stop()
+
+    nodeDataSelected, demandDataSelected, realDemand = select_execution_data(demandData, nodeData, max_num_nodes, date)
+
     # Mostrar el spinner
     if method == 'Deterministic':
         with st.spinner('Executing model'):
-            result = det.execute(num_nodos=num_nodes, nodeData=nodeData, demandData=demandData) 
+            result = det.execute(nodeData=nodeDataSelected, realDemand=realDemand, demandData=demandDataSelected) 
         st.empty()
         st.session_state["result"] = result
     elif method == 'Multi-scenario':
         if ms_option in ['Maximum expectation', 'Minimum variance']:
             with st.spinner('Executing model'):
-                result = ms.execute(num_nodos=num_nodes, num_scenarios=num_scenarios, option=ms_option, nodeData=nodeData, demandData=demandData) 
+                result = ms.execute(num_scenarios=num_scenarios, option=ms_option, nodeData=nodeDataSelected, demandData=demandDataSelected, realDemand=realDemand) 
             st.empty()
             st.session_state["result"] = result
         else:
@@ -83,14 +125,15 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
 
 if "result" in st.session_state:
     result = st.session_state["result"]
-    nodeDataSelected = nodeData[nodeData['codnode'].isin(result['codnodes_selected'])]
-    demandDataSelected = demandData[demandData['codnode'].isin(result['codnodes_selected'])]
+    nodeDataSelected = result['nodeDataSelected']
+    demandDataSelected = result['demandDataSelected']
     
     st.header('Result:', divider='red')
 
     # Show Objective Function
     st.subheader('**Objective Function:**')
-    st.markdown(f'***Distance travelled + Undelivered demand:*** {round(result['optimum_value'],2)}')
+    st.markdown(f'***Method Objective function:*** {round(result['optimum_value'],2)}')
+    st.markdown(f'***Distance travelled + Undelivered demand:*** {round(result['total_distance'] + np.sum(result['nodes_demand']) - result['capacity_used'] ,2)}')
 
     m = folium.Map(location=[nodeDataSelected['latitude'].values.mean(), nodeDataSelected['longitude'].values.mean()], zoom_start=11, tiles = "CartoDB Positron")
     for i in range(result['num_nodes']):
@@ -161,16 +204,17 @@ if "result" in st.session_state:
 
     st.header('Stadistics:', divider='red')
 
-    st.markdown(f'🚚 Truck with a capacity of **{result['total_capacity']}**')
+    st.markdown(f'🚚 Truck with a capacity of **{result['total_capacity']}** doing a distance of **{round(result['total_distance'],2)} Km**')
     st.markdown(f'**{result['num_visited']}** points have been visited using **{round(result['capacity_used'], 2)}** capacity unit')
 
     # Compute percentages
-    percentage_delivered = (result['num_visited'] / result['num_nodes']) * 100
+    percentage_clients_delivered = (result['num_visited'] / result['num_nodes']) * 100
+    percentage_delivered = (result['capacity_used'] / np.sum(result['nodes_demand'])) * 100
     percentage_truck_filling = (result['capacity_used'] / result['total_capacity']) * 100
     # Show Compute percentages
     chart_data = pd.DataFrame(
-        [percentage_delivered, percentage_truck_filling],
-        index = ["% Delivered", "% Truck"]
+        [percentage_clients_delivered, percentage_delivered, percentage_truck_filling],
+        index = ["% Clients Delivered", "% Demand Delivered", "% Truck"]
     )
     # Apply data formatting for Altair
     data = pd.melt(chart_data.reset_index(), id_vars=["index"])

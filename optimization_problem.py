@@ -103,15 +103,6 @@ def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities,
                                 (1 - model.y[i]) * d[s][i - 1] - mean) ** 2 for i in model.N for s in range(num_scenarios))
             return var
         model.OBJ = Objective(rule=obj_expression, sense=minimize) 
-    elif method == 'Minimum mean squared error':
-        '''The mean squared error is a measure of the accuracy of a model relative to the observed data. In a stochastic 
-        optimisation problem, minimising the MSE involves minimising the quadratic difference between the expected outcomes 
-        and the observed outcomes, weighted by the probabilities of the scenarios. This approach is useful when it is 
-        desired to minimise both bias and variability in the results.'''
-        def obj_expression(model): 
-            return sum(probabilities[s] * (sum(model.x[i, j] * c[i - 1][j - 1] for j in model.N) +
-                                        (1 - model.y[i]) * d[s][i - 1]) for i in model.N for s in range(num_scenarios))
-        model.OBJ = Objective(rule=obj_expression, sense=minimize) 
     else: 
         '''Risk aversion implies a preference for more certain outcomes over more uncertain outcomes, 
         even if the uncertain outcomes have a higher profit potential. In the context of a stochastic 
@@ -163,11 +154,12 @@ def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities,
 
     return model, results
 
-def feed_solution_variables(model, n, d):
+def feed_solution_variables(model, n, d, c):
     capacity_used = 0
     x_sol = np.zeros((n,n))
     u_sol = np.zeros((n))
     y_sol = np.zeros((n))
+    total_cost = 0 # In our case is distance
     for i in range(0, n):
         y_sol[i] = model.y[i+1].value
         u_sol[i] = model.u[i+1].value
@@ -175,6 +167,8 @@ def feed_solution_variables(model, n, d):
             capacity_used += d[i]
         for j in range(0,n):
             x_sol[i,j]=model.x[i+1,j+1].value
+            if x_sol[i,j] == 1:
+                total_cost += c[i][j]
 
     opt_value = model.OBJ()
 
@@ -190,37 +184,7 @@ def feed_solution_variables(model, n, d):
     logger.info('We have a total of' + str(num_dec_var) + 'decision varibales')
     logger.info('We have a total of'+ str(num_cons) + 'constraints')
 
-    return x_sol, y_sol, u_sol, capacity_used, opt_value
-
-def feed_solution_variables_multiscenario(model, n, m, d): #TODO
-    capacity_used = 0
-    d_array = np.array(d)
-    x_sol = np.zeros((n,n))
-    u_sol = np.zeros((n))
-    y_sol = np.zeros((n))
-    for i in range(0, n):
-        y_sol[i] = model.y[i+1].value
-        u_sol[i] = model.u[i+1].value
-        if y_sol[i]:
-            capacity_used += np.mean([d_array[s][i] for s in range(m)])
-        for j in range(0,n):
-            x_sol[i,j]=model.x[i+1,j+1].value
-
-    opt_value = model.OBJ()
-
-    for i in range(0, n):
-        u_sol[i] = model.u[i+1].value
-        logger.info('The Node ' + str(i+1) + ' is the ' + str(int(u_sol[i])) + 'th point visited')
-
-    logger.info('The minimum travel cost is ' + str(opt_value))
-
-    num_dec_var = sum(1 for _ in model.component_data_objects(Var))
-    num_cons = sum(1 for _ in model.component_data_objects(Constraint))
-
-    logger.info('We have a total of' + str(num_dec_var) + 'decision varibales')
-    logger.info('We have a total of'+ str(num_cons) + 'constraints')
-
-    return x_sol, y_sol, u_sol, capacity_used, opt_value
+    return x_sol, y_sol, u_sol, capacity_used, opt_value, total_cost
 
 def get_tour_cord(x_sol, latitudes, longitudes, n):
     current_node = 0

@@ -8,14 +8,12 @@ from scipy.stats import lognorm
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-def generate_data_scenarios(num_nodos, num_scenarios, nodeData, demandData):
+def generate_data_scenarios(num_scenarios, nodeData, demandData):
     random.seed(100513471)
 
     # DATA GENERATION
-    n = num_nodos # Number of points
-
-    points_ids = random.sample(range(1, len(nodeData) + 1), n)
-
+    points_ids = nodeData['codnode'].values
+    n = len(points_ids)
     latitudes = []
     longitudes = []
     d = [[] for _ in range(num_scenarios)]
@@ -33,7 +31,6 @@ def generate_data_scenarios(num_nodos, num_scenarios, nodeData, demandData):
         mu = np.mean(demand_node)
         sigma = np.std(demand_node)
         params_simulation.append((mu, sigma))
-        # TODO: Revisar que no da negativo==> Usamos la lognormal
         # https://www.probabilidadyestadistica.net/distribucion-lognormal/#grafica-de-la-distribucion-lognormal
         log_demand = np.log(demand_node)
         mu_log = np.mean(log_demand)
@@ -56,11 +53,13 @@ def generate_data_scenarios(num_nodos, num_scenarios, nodeData, demandData):
 
     return points_ids, c, d, D, latitudes, longitudes, params_simulation
 
-def execute(num_nodos, num_scenarios, option, nodeData, demandData):
-    codnodes, c, d, D, latitudes, longitudes, params_simulation= generate_data_scenarios(num_nodos, num_scenarios, nodeData, demandData)
+def execute(num_scenarios, option, nodeData, demandData, realDemand):
+    num_nodos = len(nodeData)
+    codnodes, c, d, D, latitudes, longitudes, params_simulation= generate_data_scenarios(num_scenarios, nodeData, demandData)
     prob = [1/num_scenarios for _ in range(num_scenarios)]
     model, results = op.prize_collecting_TSP_multiscenario(num_nodos, c, d, D, num_scenarios, prob, option)
-    x_sol, y_sol, u_sol, capacity_used, opt_value = op.feed_solution_variables_multiscenario(model, num_nodos, num_scenarios, d)
+    real_d = realDemand['Pallets'].values
+    x_sol, y_sol, u_sol, capacity_used, opt_value, total_distance = op.feed_solution_variables(model, num_nodos, real_d, c)
     codnodes_achived = [codnodes[i] for i in range(num_nodos) if y_sol[i] == 1]
     tour_coords = op.get_tour_cord(x_sol, latitudes, longitudes, num_nodos)
     d_array = np.array(d)
@@ -71,13 +70,16 @@ def execute(num_nodos, num_scenarios, option, nodeData, demandData):
         'num_visited':len(codnodes_achived),
         'total_capacity': D,
         'capacity_used': capacity_used,
-        'nodes_demand': [np.mean([d_array[s][i] for s in range(num_scenarios)]) for i in range(num_nodos)],
+        'total_distance': total_distance,
+        'nodes_demand': real_d, # [np.mean([d_array[s][i] for s in range(num_scenarios)]) for i in range(num_nodos)],
         'num_scenarios':num_scenarios,
         'nodes_demand_multiscenario': d,
         'params_simulations': params_simulation,
         'distance_matrix': c,
         'optimum_value': opt_value,
-        'tour_coords': tour_coords
+        'tour_coords': tour_coords,
+        'nodeDataSelected': nodeData,
+        'demandDataSelected': demandData
     }
 
     return result
