@@ -8,6 +8,9 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 def prize_collecting_TSP(n, c, d, D):
+    print(n)
+    print(len(d))
+    print(d)
     opt = SolverFactory("gurobi")
 
     model = ConcreteModel()

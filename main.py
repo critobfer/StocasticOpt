@@ -153,10 +153,11 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
         st.session_state["result"] = result
     elif method == 'Machine Learning':
         st.warning('We are working on it', icon="🔧")
-        st.stop()
+        # st.stop()
         with st.spinner('Executing model'):
-            result = ml.execute(num_nodos=num_nodes, option=ml_option, nodeData=nodeData, 
-                                demandData=demandData) 
+            result = ml.execute(option=ml_option, nodeData=nodeDataSelected, 
+                                demandData=demandDataSelected,
+                                realDemand=realDemand) 
         st.empty()
         st.session_state["result"] = result
     else:
@@ -229,6 +230,29 @@ if "result" in st.session_state:
                                    delay=800, color='red').add_to(m)
             st.warning("Rate limit for HERE service has been reached", icon="⚠️")
     st_data = st_folium(m, width=725)
+
+    ###################################################################################################
+    # MULTISCENARIO SIMULATIONS #######################################################################
+    ###################################################################################################
+    if 'nodes_predicted_demand' in result.keys():
+        st.header('Prediction info:', divider='red')
+        combined_data = []
+        combined_data.append(('Real Demand',) + tuple(result['nodes_demand']))
+        combined_data.append(('Predicted Demand',) + tuple(result['nodes_predicted_demand']))
+        df_ml = pd.DataFrame(combined_data, columns=['Variable'] + ['Node {}'.format(
+            nodeDataSelected['codnode'].values[i]) for i in range(result['num_nodes'])])
+        # Traspose DataFrame
+        df_ml = df_ml.set_index('Variable').T
+        df_ml.index = ['Node {}'.format(nodeDataSelected['codnode'].values[i]) 
+                       for i in range(result['num_nodes'])]
+        col1, col2 = st.columns(2)
+        with col1:
+            st.dataframe(df_ml, use_container_width=True)
+        with col2:
+           	# :chart_with_upwards_trend:
+            st.markdown(f' 📈 MSE: **{round(result["MSE"], 2)}**')
+            st.markdown(f' 📈 R2: **{round(result["R2"], 2)}**')
+            st.markdown(f' 📈 MAE: **{round(result["MAE"], 2)}**')
 
     ###################################################################################################
     # MULTISCENARIO SIMULATIONS #######################################################################
