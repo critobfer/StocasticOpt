@@ -104,14 +104,10 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
         st.empty()
         st.session_state["result"] = result
     elif method == 'Multi-scenario':
-        if ms_option in ['Maximum expectation', 'Conditional Value at Risk (CVaR)']:
-            with st.spinner('Executing model'):
-                result = ms.execute(num_scenarios=num_scenarios, option=ms_option, nodeData=nodeDataSelected, demandData=demandDataSelected, realDemand=realDemand) 
-            st.empty()
-            st.session_state["result"] = result
-        else:
-            st.warning('We are working on it', icon="🔧")
-            st.stop()
+        with st.spinner('Executing model'):
+            result = ms.execute(num_scenarios=num_scenarios, option=ms_option, nodeData=nodeDataSelected, demandData=demandDataSelected, realDemand=realDemand) 
+        st.empty()
+        st.session_state["result"] = result
     elif method == 'Machine Learning':
         st.warning('We are working on it', icon="🔧")
         st.stop()

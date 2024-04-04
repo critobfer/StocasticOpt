@@ -9,7 +9,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 def generate_data_scenarios(num_scenarios, nodeData, demandData):
-    random.seed(100513471)
+    np.random.seed(100513471)
 
     # DATA GENERATION
     points_ids = nodeData['codnode'].values

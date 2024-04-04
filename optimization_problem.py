@@ -66,7 +66,7 @@ def prize_collecting_TSP(n, c, d, D):
 
     return model, results
 
-def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities, method: str, alpha:float = 0.4):
+def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities, method: str, alpha:float = 0.8):
     opt = SolverFactory("gurobi")
 
     model = ConcreteModel()
@@ -129,13 +129,16 @@ def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities,
         
         model.OBJ = Objective(rule=obj_expression, sense=minimize) 
     elif method == 'Worst Case Analysis':
+        model.t = Var() #worst case cost scenario
+
+        #definition of OF per scenario
+        def worst_case_cons(model,s):
+            return sum(sum(model.x[i,j]*c[i-1][j-1] for j in model.N) for i in model.N) + sum((1-model.y[i])*d[s-1][i-1] for i in model.N) <= model.t
+        model.costcv_cons_cons = Constraint(model.S, rule=worst_case_cons)
+
         def obj_expression(model): 
-            return sum(probabilities[s] * (sum(model.x[i, j] * c[i - 1][j - 1] for j in model.N) +
-                                        (1 - model.y[i]) * d[s][i - 1]) for i in model.N for s in range(num_scenarios))
+            return model.t
         model.OBJ = Objective(rule=obj_expression, sense=minimize) 
-
-
-
 
     # Only once from i
     def max_once_from_i(model, i): 
