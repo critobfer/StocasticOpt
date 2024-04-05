@@ -10,6 +10,7 @@ import here
 import random
 import deterministic as det
 import multi_scenario as ms
+import knn_multi_scenario as kms
 import machine_learning as ml
 
 ####################################################################################################
@@ -123,6 +124,11 @@ if method == 'Multi-scenario':
     ms_option = st.sidebar.selectbox('Options', ['Maximum expectation', 
                                                  'Conditional Value at Risk (CVaR)', 
                                                  'Worst Case Analysis'])
+elif method == 'KNN Multi-scenario':
+    k = st.sidebar.number_input('Choose the number of neighbour', min_value=1, max_value=40, step=1, value=20)
+    ms_option = st.sidebar.selectbox('Options', ['Maximum expectation', 
+                                                 'Conditional Value at Risk (CVaR)', 
+                                                 'Worst Case Analysis'])
 elif method == 'Machine Learning':
     ml_option = st.sidebar.selectbox('Machine Learning Options', ['Linear Regression', 'Random Forest',
                                                                   'SVR', 'Neural Network', 'XGBoosting', 
@@ -161,10 +167,10 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
         st.empty()
         st.session_state["result"] = result
     elif method == 'KNN Multi-scenario':
-        st.warning('We are working on it', icon="🔧")
-        st.stop()
+        # st.warning('We are working on it', icon="🔧")
+        # st.stop()
         with st.spinner('Executing model'):
-            result = ms.execute(num_scenarios=num_scenarios, option=ms_option, 
+            result = kms.execute(k=k, option=ms_option,
                                 nodeData=nodeDataSelected, demandData=demandDataSelected, 
                                 realDemand=realDemand) 
         st.empty()
@@ -290,7 +296,7 @@ if "result" in st.session_state:
     ###################################################################################################
     # MULTISCENARIO SIMULATIONS #######################################################################
     ###################################################################################################
-    if 'nodes_demand_multiscenario' in result.keys():
+    elif 'num_scenarios' in result.keys():
         st.header('Simulation info:', divider='red')
         d_ms = result['nodes_demand_multiscenario']
         params_simulation = result['params_simulations']
@@ -305,6 +311,7 @@ if "result" in st.session_state:
             demands.append(demand)
             mus.append(mu)
             sigmas.append(sigma)
+        combined_data.append(('Real Demand',) + tuple(result['nodes_demand']))
         combined_data.append(('μ',) + tuple(mus))
         combined_data.append(('σ',) + tuple(sigmas))
         combined_data.append(('distribution',) + tuple(demands))
@@ -320,6 +327,35 @@ if "result" in st.session_state:
         st.dataframe(df_ms, use_container_width=True, 
                      column_config={"distribution": 
                                     st.column_config.BarChartColumn("Demand Distribution", y_min=0, y_max=80),},)
+    elif 'k' in  result.keys():
+        st.header(f'Simulation info for {result['k']} Nearest Neighbour:', divider='red')
+        d_ms = result['nodes_demand_multiscenario']
+        min_max_dist = result['min_max_dist']
+        combined_data = []
+        demands = []
+        range_distances = []
+        for i in range(result['num_nodes']):
+            min_dist, max_dist = min_max_dist[i]
+            demand, bin = np.histogram(demandDataSelected[demandDataSelected['codnode'] == 
+                                                          nodeDataSelected['codnode'].values[i]]['Pallets'].tolist())
+            demands.append(demand)
+            range_distances.append(str(round(min_dist,2)) + '-' + str(round(max_dist,2)))
+
+        combined_data.append(('Real Demand',) + tuple(result['nodes_demand']))
+        combined_data.append(('Range Distance',) + tuple(range_distances))
+        combined_data.append(('distribution',) + tuple(demands))
+        for i in range(result['k']):
+            combined_data.append(('{}º neighbour demand'.format(i+1),) + tuple(d_ms[i]))
+        
+        df_ms = pd.DataFrame(combined_data, columns=['Variable'] + ['Node {}'.format(
+            nodeDataSelected['codnode'].values[i]) for i in range(result['num_nodes'])])
+        # Traspose DataFrame
+        df_ms = df_ms.set_index('Variable').T
+        df_ms.index = ['Node {}'.format(nodeDataSelected['codnode'].values[i]) 
+                       for i in range(result['num_nodes'])]
+        st.dataframe(df_ms, use_container_width=True, 
+                column_config={"distribution": 
+                            st.column_config.BarChartColumn("Demand Distribution", y_min=0, y_max=80),},)
         
         
     #################################################################################################

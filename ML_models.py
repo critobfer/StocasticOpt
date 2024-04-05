@@ -7,6 +7,8 @@ from sklearn.model_selection import GridSearchCV
 from xgboost import XGBRegressor
 from sklearn.neural_network import MLPRegressor
 import numpy as np
+from sklearn.neighbors import KNeighborsRegressor
+
 
 def linear_regresion(X_train, X_test, y_train):
     result = {}
@@ -239,3 +241,34 @@ def lasso_regression(X_train, X_test, y_train):
     result['model_info'] = 'Coefficients'
 
     return result
+
+
+
+def get_knn_demand(k, X_train, X_test, y_train):
+    transformations = ColumnTransformer([
+        ('encoder', OneHotEncoder(), ['ZIPcod', 'Day Of Week', 'Holiday','Tomorrow Holiday'])
+    ], remainder='passthrough')
+
+    X_train_trans = transformations.fit_transform(X_train)
+    X_test_trans = transformations.transform(X_test)
+    model = KNeighborsRegressor(n_neighbors=k)
+
+    model.fit(X_train_trans, y_train)
+
+    distances, indexes = model.kneighbors(X_test_trans)
+
+    # Initialize an empty list to store k nearest values
+    k_nearest_values = []
+
+    # Iterate through each set of neighbors
+    for neighbor_distances, neighbor_indexes in zip(distances[0], indexes[0]):
+        # Append the y_train value to the list of neighbor values
+        k_nearest_values.append((neighbor_distances, y_train.iloc[neighbor_indexes]))
+    # Sort the neighbor values based on distance (ascending order)
+    k_nearest_values.sort(key=lambda x: x[0])
+    k_nearest_values = [value for _, value in k_nearest_values]
+
+    min_dist = distances[0].min()
+    max_dist = distances[0].max()
+
+    return k_nearest_values, min_dist, max_dist
