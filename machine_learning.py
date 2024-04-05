@@ -3,8 +3,8 @@ from geopy.distance import geodesic
 import logging
 import optimization_problem as op
 import numpy as np
-from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
+import ML_models as models
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -12,8 +12,8 @@ logger.setLevel(logging.INFO)
 def predict_demand(nodeData, demandData, realDemand, method):
     np.random.seed(100513471)
     # CLEAN THE DATE
-    demandData = demandData.drop(['Date','Day Of Week', 'Holiday','Tomorrow Holiday'], axis=1)
-    realDemand = realDemand.drop(['Date','Day Of Week', 'Holiday','Tomorrow Holiday'], axis=1)
+    demandData = demandData.drop(['Date', 'Year'], axis=1)
+    realDemand = realDemand.drop(['Date', 'Year'], axis=1)
     
     # DATA GENERATION
     points_ids = nodeData['codnode'].values
@@ -21,6 +21,8 @@ def predict_demand(nodeData, demandData, realDemand, method):
     latitudes = []
     longitudes = []
     d = []
+    n_train = []
+    model_resutls = []
     i = 0
     for codnode in points_ids:
         node = nodeData[nodeData['codnode'] == codnode] 
@@ -29,16 +31,23 @@ def predict_demand(nodeData, demandData, realDemand, method):
         latitudes.append(lat)
         lon = node['longitude'].values[0]
         longitudes.append(lon)
-        # We generate m scenarios
-        # TODO: Poner modelo
+        # We prepare the data
         demandNode = demandData[demandData['codnode'] == codnode]
         realDemandNode = realDemand[realDemand['codnode'] == codnode]
-        # Inicializar y entrenar el modelo de regresión lineal
-        model = LinearRegression()
-        model.fit(demandNode.drop('Pallets', axis=1), demandNode['Pallets'])
-        # Predecir en el conjunto de prueba
-        demand_prediction = model.predict(realDemandNode.drop('Pallets', axis=1))
-        d.append(demand_prediction[0])
+        X_train = demandNode.drop('Pallets', axis=1)
+        y_train = demandNode['Pallets']
+        X_test = realDemandNode.drop('Pallets', axis=1)
+        if method == 'Linear Regression':
+            result = models.linear_regresion(X_train=X_train, X_test=X_test, y_train=y_train)
+        elif method == 'Random Forest':
+            result = models.random_forest(X_train=X_train, X_test=X_test, y_train=y_train)
+        elif method == 'SVR':
+            result = models.svm(X_train=X_train, X_test=X_test, y_train=y_train)
+        else:
+            result = {'prediction':0}
+        d.append(result['prediction'])
+        n_train.append(len(X_train))
+        model_resutls.append(result)
         i+=1
 
     # Cost matrix, in this case distance
@@ -52,11 +61,11 @@ def predict_demand(nodeData, demandData, realDemand, method):
             c[i][j] = distancia
         c[i][i] = 1000000
 
-    return points_ids, c, d, D, latitudes, longitudes
+    return points_ids, c, d, D, latitudes, longitudes, n_train, model_resutls
 
 def execute(option, nodeData, demandData, realDemand):
     num_nodos = len(nodeData)
-    codnodes, c, d, D, latitudes, longitudes = predict_demand(nodeData, demandData, realDemand, option)
+    codnodes, c, d, D, latitudes, longitudes, n_train, model_resutls = predict_demand(nodeData, demandData, realDemand, option)
     model, results = op.prize_collecting_TSP(num_nodos, c, d, D)
     real_d = realDemand['Pallets'].values
     x_sol, y_sol, u_sol, capacity_used, opt_value, total_distance = op.feed_solution_variables(model, num_nodos, real_d, c)
@@ -77,6 +86,8 @@ def execute(option, nodeData, demandData, realDemand):
         'total_distance': total_distance,
         'nodes_demand': real_d,
         'nodes_predicted_demand': d,
+        'n_train': n_train,
+        'model_result': model_resutls,
         'MSE':mse,
         'R2':r2,
         'MAE':mae,
@@ -84,7 +95,8 @@ def execute(option, nodeData, demandData, realDemand):
         'optimum_value': opt_value,
         'tour_coords': tour_coords,
         'nodeDataSelected': nodeData,
-        'demandDataSelected': demandData
+        'demandDataSelected': demandData,
+        'method': option
     }
 
     return result

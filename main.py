@@ -23,10 +23,15 @@ def select_execution_data(demandData, nodeData, max_num_nodes, date):
     if number_nodes > max_num_nodes:
         codnode_list = random.sample(codnode_list, max_num_nodes)
     nodeDataModel = nodeData[nodeData['codnode'].isin(codnode_list)]
+
     demandDataModel = demandData[(demandData['Date'] < date) & 
                                  (demandData['codnode'].isin(codnode_list))]
     realDemand= demandData[(demandData['Date'] == date) & (demandData['codnode']
-                                                           .isin(codnode_list))]
+                                                           .isin(codnode_list))]                       
+    # Sort based on codnode_list
+    nodeDataModel = nodeDataModel.sort_values(by='codnode')
+    demandDataModel = demandDataModel.sort_values(by='codnode')
+    realDemand = realDemand.sort_values(by='codnode')
     return nodeDataModel, demandDataModel, realDemand
 
 ####################################################################################################
@@ -86,8 +91,13 @@ if demandData is not None:
 st.sidebar.subheader('Day we want to solve', divider='red')
 if demandData is not None:
     year = st.sidebar.selectbox('Select the year', options=[2023, 2024])
-    months = [month_dict[i] for i in list(demandData[demandData['Year'] == year]
-                                          ['Month'].sort_values())]
+    if year == 2023:
+        months = [month_dict[i] for i in list(demandData[demandData['Year'] == year]
+                                            ['Month'].sort_values()) if i >= 7]
+    else:
+        months = [month_dict[i] for i in list(demandData[demandData['Year'] == year]
+                                    ['Month'].sort_values())]
+
     month_name = st.sidebar.select_slider('Select the month', options=months)
     month = month_dict_reversed[month_name]
     days = list(demandData[(demandData['Year'] == year) & (demandData['Month'] == month)]
@@ -114,10 +124,8 @@ if method == 'Multi-scenario':
                                                  'Conditional Value at Risk (CVaR)', 
                                                  'Worst Case Analysis'])
 elif method == 'Machine Learning':
-    ml_option = st.sidebar.selectbox('Machine Learning Options', ['RNNs', 'CNNs', 'Attention Models', 
-                                                                  'DNN', 'Ensemble Models', 
-                                                                  'Gaussian Processes', 
-                                                                  'Hidden Markov Models'])
+    ml_option = st.sidebar.selectbox('Machine Learning Options', ['Linear Regression', 'Random Forest',
+                                                                  'SVR'])
 max_num_nodes = st.sidebar.slider('Max number of points', min_value=3, max_value=40, value=15)
 
 ####################################################################################################
@@ -152,7 +160,7 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
         st.empty()
         st.session_state["result"] = result
     elif method == 'Machine Learning':
-        st.warning('We are working on it', icon="🔧")
+        # st.warning('We are working on it', icon="🔧")
         # st.stop()
         with st.spinner('Executing model'):
             result = ml.execute(option=ml_option, nodeData=nodeDataSelected, 
@@ -180,9 +188,12 @@ if "result" in st.session_state:
     # Show Objective Function
     st.subheader('**Objective Function:**')
     st.markdown(f'***Method Objective function:*** {round(result['optimum_value'],2)}')
-    st.markdown(f'***Distance travelled + Undelivered demand:*** {round(result['total_distance'] 
-                                                                        + np.sum(result['nodes_demand']) 
-                                                                        - result['capacity_used'] ,2)}')
+    col1, col2= st.columns(2)
+    with col1:
+        st.metric("Distance travelled", f'{round(result['total_distance'],2)}Km', "")
+    with col2:
+        st.metric("Undelivered demand", f'{round(np.sum(result['nodes_demand'])
+                                               - result['capacity_used'] ,2)} Pallets', "")
     ###################################################################################################
     # MAP                   ###########################################################################
     ###################################################################################################
@@ -232,27 +243,37 @@ if "result" in st.session_state:
     st_data = st_folium(m, width=725)
 
     ###################################################################################################
-    # MULTISCENARIO SIMULATIONS #######################################################################
+    # ML PREDICTIONS            #######################################################################
     ###################################################################################################
     if 'nodes_predicted_demand' in result.keys():
-        st.header('Prediction info:', divider='red')
+        st.header('Prediction info for ' + str(result['method'])+ ':', divider='red')
+
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.markdown(f' 📈 MSE: **{round(result["MSE"], 2)}**')
+        with col2:
+            st.markdown(f' 📈 R2: **{round(result["R2"], 2)}**')
+        with col3:
+            st.markdown(f' 📈 MAE: **{round(result["MAE"], 2)}**')
         combined_data = []
         combined_data.append(('Real Demand',) + tuple(result['nodes_demand']))
         combined_data.append(('Predicted Demand',) + tuple(result['nodes_predicted_demand']))
+        combined_data.append(('Train data size',) + tuple(result['n_train']))
+
+        model_info = result['model_result'][0]['model_info']
+        model_info_data = []
+        for i in range(result['num_nodes']):
+            model_info_node = result['model_result'][i][model_info]
+            model_info_data.append(model_info_node)
+        combined_data.append((model_info,) + tuple(model_info_data))
+
         df_ml = pd.DataFrame(combined_data, columns=['Variable'] + ['Node {}'.format(
             nodeDataSelected['codnode'].values[i]) for i in range(result['num_nodes'])])
         # Traspose DataFrame
         df_ml = df_ml.set_index('Variable').T
         df_ml.index = ['Node {}'.format(nodeDataSelected['codnode'].values[i]) 
                        for i in range(result['num_nodes'])]
-        col1, col2 = st.columns(2)
-        with col1:
-            st.dataframe(df_ml, use_container_width=True)
-        with col2:
-           	# :chart_with_upwards_trend:
-            st.markdown(f' 📈 MSE: **{round(result["MSE"], 2)}**')
-            st.markdown(f' 📈 R2: **{round(result["R2"], 2)}**')
-            st.markdown(f' 📈 MAE: **{round(result["MAE"], 2)}**')
+        st.dataframe(df_ml, use_container_width=True)
 
     ###################################################################################################
     # MULTISCENARIO SIMULATIONS #######################################################################
@@ -318,8 +339,10 @@ if "result" in st.session_state:
             return "#FFA07A"  # LightSalmon
         elif value < 75:
             return "#FFD700"  # Gold
-        else:
+        elif value <=100:
             return "#98FB98"  # PaleGreen
+        else:
+            return "#FFA07A"  # LightSalmon
 
     data['color'] = data['value'].apply(assign_color)
 
