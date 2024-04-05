@@ -34,17 +34,24 @@ def predict_demand(nodeData, demandData, realDemand, method):
         # We prepare the data
         demandNode = demandData[demandData['codnode'] == codnode]
         realDemandNode = realDemand[realDemand['codnode'] == codnode]
-        X_train = demandNode.drop('Pallets', axis=1)
+        X_train = demandNode.drop(['Pallets', 'codnode'], axis=1)
         y_train = demandNode['Pallets']
-        X_test = realDemandNode.drop('Pallets', axis=1)
+        X_test = realDemandNode.drop(['Pallets', 'codnode'], axis=1)
         if method == 'Linear Regression':
             result = models.linear_regresion(X_train=X_train, X_test=X_test, y_train=y_train)
         elif method == 'Random Forest':
             result = models.random_forest(X_train=X_train, X_test=X_test, y_train=y_train)
         elif method == 'SVR':
             result = models.svm(X_train=X_train, X_test=X_test, y_train=y_train)
-        else:
-            result = {'prediction':0}
+        elif method == 'Neural Network':
+            result = models.neural_network(X_train=X_train, X_test=X_test, y_train=y_train)
+        elif method == 'XGBoosting':
+            result = models.xgboost_lgbm(X_train=X_train, X_test=X_test, y_train=y_train)
+        elif method == 'Lasso':
+            result = models.lasso_regression(X_train=X_train, X_test=X_test, y_train=y_train)
+        elif method == 'Ridge':
+            result = models.ridge_regression(X_train=X_train, X_test=X_test, y_train=y_train)
+
         d.append(result['prediction'])
         n_train.append(len(X_train))
         model_resutls.append(result)

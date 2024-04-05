@@ -110,7 +110,7 @@ if demandData is not None:
 ###################################################################################################
 st.sidebar.subheader('Method', divider='red')
 # Drop-down controls and bars
-method = st.sidebar.selectbox('Select Method', ['Deterministic', 'Multi-scenario', 
+method = st.sidebar.selectbox('Select Method', ['Deterministic', 'Multi-scenario', 'KNN Multi-scenario',
                                                 'Machine Learning'])
 
 ###################################################################################################
@@ -125,7 +125,8 @@ if method == 'Multi-scenario':
                                                  'Worst Case Analysis'])
 elif method == 'Machine Learning':
     ml_option = st.sidebar.selectbox('Machine Learning Options', ['Linear Regression', 'Random Forest',
-                                                                  'SVR'])
+                                                                  'SVR', 'Neural Network', 'XGBoosting', 
+                                                                  'Lasso', 'Ridge'])
 max_num_nodes = st.sidebar.slider('Max number of points', min_value=3, max_value=40, value=15)
 
 ####################################################################################################
@@ -159,9 +160,17 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
                                 realDemand=realDemand) 
         st.empty()
         st.session_state["result"] = result
+    elif method == 'KNN Multi-scenario':
+        st.warning('We are working on it', icon="🔧")
+        st.stop()
+        with st.spinner('Executing model'):
+            result = ms.execute(num_scenarios=num_scenarios, option=ms_option, 
+                                nodeData=nodeDataSelected, demandData=demandDataSelected, 
+                                realDemand=realDemand) 
+        st.empty()
+        st.session_state["result"] = result
     elif method == 'Machine Learning':
-        # st.warning('We are working on it', icon="🔧")
-        # st.stop()
+
         with st.spinner('Executing model'):
             result = ml.execute(option=ml_option, nodeData=nodeDataSelected, 
                                 demandData=demandDataSelected,
@@ -186,14 +195,17 @@ if "result" in st.session_state:
     # OBJECTIVE FUNCTION    ###########################################################################
     ###################################################################################################
     # Show Objective Function
-    st.subheader('**Objective Function:**')
-    st.markdown(f'***Method Objective function:*** {round(result['optimum_value'],2)}')
+    st.subheader(f'**Objective Function:** {round(result['total_distance'] +
+                                            np.sum(result['nodes_demand']) - 
+                                                  result['capacity_used'] ,2)}')
+
     col1, col2= st.columns(2)
     with col1:
         st.metric("Distance travelled", f'{round(result['total_distance'],2)}Km', "")
     with col2:
         st.metric("Undelivered demand", f'{round(np.sum(result['nodes_demand'])
                                                - result['capacity_used'] ,2)} Pallets', "")
+    st.markdown(f'***Method Objective function:*** {round(result['optimum_value'],2)}')
     ###################################################################################################
     # MAP                   ###########################################################################
     ###################################################################################################
