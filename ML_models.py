@@ -94,8 +94,6 @@ def svm(X_train, X_test, y_train):
     
     # Best model found by GridSearchCV
     model = grid_search.best_estimator_
-    print('AAAAAAAAAAAAAAAA')
-    print(model)
     model.fit(X_train_trans, y_train)
     # Predecir en el conjunto de prueba
     demand_prediction = model.predict(X_test_trans)
