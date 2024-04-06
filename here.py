@@ -3,44 +3,39 @@ import requests
 import streamlit as st
 
 def calculate_route_HERE(coordinates: list[tuple[float, float]]):
-    # Funcion que llama a la API de HERE usando una lista de nodos y un tipo de vehiculo.
+ # Function that calls the HERE API using a list of nodes and a vehicle type.
 
-    # Parametros
-    # coordinates -- Lista de nodos
-    # vehicle -- Tipo de vehiculo car, truck
+    # parameters
+    # coordinates -- Node list
+    # vehicle -- Vehicle type car, truck
 
-    # Devuelve
-    # Las coordenadas de la ruta junto a su distancia en KM y su tiempo en horas.
-    # hereAPIKey = 's2U71rkGXO4mXuRQmom6nRYXE01a-KnpHfhy6DRJDXI'  # API utilizado para Here
-    hereAPIKey = 'ZmuIUyPPUobvj5-Vate_oFaug3AL7VbwFZX5KX3S9Yc'
+    # returns
+    # The coordinates of the route.
+    hereAPIKey_1 = 's2U71rkGXO4mXuRQmom6nRYXE01a-KnpHfhy6DRJDXI'  
+    hereAPIKey_2 = 'ZmuIUyPPUobvj5-Vate_oFaug3AL7VbwFZX5KX3S9Yc'
     url = "https://router.hereapi.com/v8/routes?&transportMode=truck"
     origenPoint = coordinates[0]
-    origin = '&origin=' + str(origenPoint[0]) + ',' + str(origenPoint[1])  # Punto origen
+    origin = '&origin=' + str(origenPoint[0]) + ',' + str(origenPoint[1])  # Origin
     destinationPoint = coordinates[len(coordinates) - 1]
-    destination = '&destination=' + str(destinationPoint[0]) + ',' + str(destinationPoint[1])  # Punto Fin de Ruta
+    destination = '&destination=' + str(destinationPoint[0]) + ',' + str(destinationPoint[1])  # Final Point
     via = ''
-    for pos in range(1, len(coordinates) - 1): # Trayecto de nodos desde el segundo hasta el penultimo
+    for pos in range(1, len(coordinates) - 1): # Path from the first until n-1
         point = coordinates[pos]
         via = via + '&via=' + str(point[0]) + ',' + str(point[1])
-    urlQuery = url + origin + destination + via + '!passThrough=true&return=polyline,summary' + '&apikey=' + hereAPIKey
-    dataRouteResponse = call_api(urlQuery)
-    routeInfo = list()
-
+    urlQuery_1 = url + origin + destination + via + '!passThrough=true&return=polyline,summary' + '&apikey=' + hereAPIKey_1
+    urlQuery_2 = url + origin + destination + via + '!passThrough=true&return=polyline,summary' + '&apikey=' + hereAPIKey_2
+    try:
+        dataRouteResponse = call_api(urlQuery_1)
+    except:
+        dataRouteResponse = call_api(urlQuery_2)
     coordsList = get_coordinates_list_from_here(dataRouteResponse)
-    # routeDistance, routeTime = get_route_distance_time_here(dataRouteResponse)
-
-    # formattedDistance = round(routeDistance / 1000, 2)  # FROM M TO KM
-    # formattedTime = round((routeTime / 60) / 60, 2)  # FROM SECONDS TO HOURS
-    routeInfo.append(coordsList)
-    # routeInfo.append(formattedDistance)
-    # routeInfo.append(formattedTime)
     return coordsList
 
 def call_api(url):
     st.success('Llamada a la API')
-    # Hace GET al endpoint representado por la url dado hasta que devuelva 200. Despues devuelve un json que representa la respuesta.
+    # GET to the endpoint represented by the given url until it returns 200. It then returns a json representing the respons
     response = requests.get(url)
-    if response.status_code != requests.codes.ok:  # para respuesta de json distintas de 200
+    if response.status_code != requests.codes.ok:  
         raise Exception
     else:
         data = response.json()
@@ -48,7 +43,7 @@ def call_api(url):
 
 
 def get_coordinates_list_from_here(dataRouteResponse):
-    # Processa la polyline de HERE y la pasa a coordenadas.
+    # Processes the HERE polyline and passes it to coordinates.
     numberOfPolylines = len(dataRouteResponse['routes'][0]['sections'])
     coordsList = list()
     for sectionPos in range(numberOfPolylines):
@@ -56,22 +51,3 @@ def get_coordinates_list_from_here(dataRouteResponse):
         coordsResponse = fp.decode(polyline)
         coordsList.extend(coordsResponse)
     return coordsList
-    
-
-def get_route_distance_time_here(dataRouteResponse):
-    # Processa la distancia y tiempo de la ruta HERE.
-
-    # Parametros
-    # dataRouteResponse -- Objeto respuesta de la API de HERE que representa la ruta.
-
-    # Devuelve
-    # Distancia en metros y tiempo en segundos para una ruta dada.
-    
-    numberOfStops = len(dataRouteResponse['routes'][0]['sections'])
-    routeDistance = 0
-    routeTime = 0
-    for sectionPos in range(numberOfStops):
-        summaryInfo = dataRouteResponse['routes'][0]['sections'][sectionPos]['summary']
-        routeDistance = routeDistance + summaryInfo['length']
-        routeTime = routeTime + summaryInfo['duration']
-    return routeDistance, routeTime
