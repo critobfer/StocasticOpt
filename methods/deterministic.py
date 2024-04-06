@@ -1,8 +1,6 @@
-import random
-# !pip install geopy
 from geopy.distance import geodesic
 import logging
-import optimization_problem as op
+import auxiliar_lib.optimization_problem as op
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

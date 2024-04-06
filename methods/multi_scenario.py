@@ -1,23 +1,22 @@
 from geopy.distance import geodesic
 import logging
-import optimization_problem as op
+import auxiliar_lib.optimization_problem as op
 import numpy as np
-import ML_models as models
+from scipy.stats import lognorm
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-def generate_data_scenarios(k, nodeData, demandData, realDemand):
-    # CLEAN THE DATE
-    demandData = demandData.drop(['Date', 'Year'], axis=1)
-    realDemand = realDemand.drop(['Date', 'Year'], axis=1)
+def generate_data_scenarios(num_scenarios, nodeData, demandData):
+    np.random.seed(100513471)
+
     # DATA GENERATION
     points_ids = nodeData['codnode'].values
     n = len(points_ids)
     latitudes = []
     longitudes = []
-    d = [[] for _ in range(k)]
-    min_max_dist = []
+    d = [[] for _ in range(num_scenarios)]
+    params_simulation = []
     i = 0
     for codnode in points_ids:
         node = nodeData[nodeData['codnode'] == codnode] 
@@ -27,15 +26,17 @@ def generate_data_scenarios(k, nodeData, demandData, realDemand):
         lon = node['longitude'].values[0]
         longitudes.append(lon)
         # We generate m scenarios
-        demandNode = demandData[demandData['codnode'] == codnode]
-        realDemandNode = realDemand[realDemand['codnode'] == codnode]
-        X_train = demandNode.drop(['Pallets', 'codnode'], axis=1)
-        y_train = demandNode['Pallets']
-        X_test = realDemandNode.drop(['Pallets', 'codnode'], axis=1)
-        neighbors_demand_values, min_dist, max_dist = models.get_knn_demand(k, X_train, X_test, y_train)
-        for i in range(k):
-            d[i].append(neighbors_demand_values[i])
-        min_max_dist.append([min_dist, max_dist])
+        demand_node = demandData[demandData['codnode'] == codnode]['Pallets'].values
+        mu = np.mean(demand_node)
+        sigma = np.std(demand_node)
+        params_simulation.append((mu, sigma))
+        # https://www.probabilidadyestadistica.net/distribucion-lognormal/#grafica-de-la-distribucion-lognormal
+        log_demand = np.log(demand_node)
+        mu_log = np.mean(log_demand)
+        sigma_log = np.std(log_demand)
+        sample = np.random.normal(mu_log, sigma_log, num_scenarios)
+        for s in range(num_scenarios):
+            d[s].append(np.exp(sample[s]))
         i+=1
 
     # Cost matrix, in this case distance
@@ -49,21 +50,18 @@ def generate_data_scenarios(k, nodeData, demandData, realDemand):
             c[i][j] = distancia
         c[i][i] = 1000000
 
-    return points_ids, c, d, D, latitudes, longitudes, min_max_dist
+    return points_ids, c, d, D, latitudes, longitudes, params_simulation
 
-def execute(k, option, nodeData, demandData, realDemand):
+def execute(num_scenarios, option, nodeData, demandData, realDemand):
     num_nodos = len(nodeData)
-    codnodes, c, d, D, latitudes, longitudes, min_max_dist = generate_data_scenarios(k, nodeData, demandData, realDemand)
-    # The first scenario has more probaility
-    weight = [1 / (2**i) for i in range(1, k + 1)]
-    total = sum(weight)
-    prob = [w / total for w in weight] # To sum up 1
-
-    model, results = op.prize_collecting_TSP_multiscenario(num_nodos, c, d, D, k, prob, option)
+    codnodes, c, d, D, latitudes, longitudes, params_simulation= generate_data_scenarios(num_scenarios, nodeData, demandData)
+    prob = [1/num_scenarios for _ in range(num_scenarios)]
+    model, results = op.prize_collecting_TSP_multiscenario(num_nodos, c, d, D, num_scenarios, prob, option)
     real_d = realDemand['Pallets'].values
     x_sol, y_sol, u_sol, capacity_used, opt_value, total_distance = op.feed_solution_variables(model, num_nodos, real_d, c)
     codnodes_achived = [codnodes[i] for i in range(num_nodos) if y_sol[i] == 1]
     tour_coords = op.get_tour_cord(x_sol, latitudes, longitudes, num_nodos)
+    d_array = np.array(d)
     result = {
         'codnodes_selected': codnodes,
         'num_nodes':len(codnodes),
@@ -72,10 +70,10 @@ def execute(k, option, nodeData, demandData, realDemand):
         'total_capacity': D,
         'capacity_used': capacity_used,
         'total_distance': total_distance,
-        'nodes_demand': real_d, 
-        'k':k,
-        'min_max_dist':min_max_dist,
+        'nodes_demand': real_d, # [np.mean([d_array[s][i] for s in range(num_scenarios)]) for i in range(num_nodos)],
+        'num_scenarios':num_scenarios,
         'nodes_demand_multiscenario': d,
+        'params_simulations': params_simulation,
         'distance_matrix': c,
         'optimum_value': opt_value,
         'tour_coords': tour_coords,

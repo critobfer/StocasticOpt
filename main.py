@@ -6,12 +6,12 @@ import altair as alt
 import folium # https://folium.streamlit.app/
 from streamlit_folium import st_folium 
 from streamlit_extras.dataframe_explorer import dataframe_explorer 
-import here
+import auxiliar_lib.here as here
 import random
-import deterministic as det
-import multi_scenario as ms
-import knn_multi_scenario as kms
-import machine_learning as ml
+import methods.deterministic as det
+import methods.multi_scenario as ms
+import methods.knn_multi_scenario as kms
+import methods.machine_learning as ml
 
 ####################################################################################################
 # AUXILIAR FUNCTIONS     ###########################################################################
@@ -422,5 +422,3 @@ if "result" in st.session_state:
 
 ################################################################################################
 # os.system('streamlit run c:/Users/ctff0/OneDrive/Escritorio/TFM/StocasticOpt/main.py')
-
-
