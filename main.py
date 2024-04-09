@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import altair as alt
+import requests
+import io
 import folium # https://folium.streamlit.app/
 from streamlit_folium import st_folium 
 from streamlit_extras.dataframe_explorer import dataframe_explorer 
@@ -12,6 +14,7 @@ import methods.deterministic as det
 import methods.multi_scenario as ms
 import methods.knn_multi_scenario as kms
 import methods.machine_learning as ml
+from bs4 import BeautifulSoup
 
 ####################################################################################################
 # AUXILIAR FUNCTIONS     ###########################################################################
@@ -76,14 +79,28 @@ st.sidebar.header('Configuration', divider='red')
 # FILES                  ##########################################################################
 ###################################################################################################
 # Select file from computer
-nodeData = st.sidebar.file_uploader(":open_file_folder: Node File", type=["csv"])
+# nodeData = st.sidebar.file_uploader(":open_file_folder: Node File", type=["csv"])
+# if nodeData is not None:
+#     nodeData = pd.read_csv(nodeData, encoding='latin-1', sep=';')
+#     st.session_state["nodeData"] = nodeData
+# demandData = st.sidebar.file_uploader(":open_file_folder: Demand File", type=["csv"])
+# if demandData is not None:
+#     demandData = pd.read_csv(demandData, encoding='latin-1', sep=';')
+#     demandData['Date'] = pd.to_datetime(demandData['Date'])
+#     st.session_state["demandData"] = demandData
+
+# Get file from github
+nodeData_github_link = "https://raw.githubusercontent.com/critobfer/StocasticOpt/main/data/nodeData.csv"
+demandData_github_link = "https://raw.githubusercontent.com/critobfer/StocasticOpt/main/data/demandDataComplete.csv"
+
+nodeData = pd.read_csv(nodeData_github_link, sep=';', encoding='latin-1') 
 if nodeData is not None:
-    nodeData = pd.read_csv(nodeData, encoding='latin-1', sep=';')
     st.session_state["nodeData"] = nodeData
-demandData = st.sidebar.file_uploader(":open_file_folder: Demand File", type=["csv"])
+
+demandData = pd.read_csv(demandData_github_link, sep=';', encoding='latin-1') 
 if demandData is not None:
-    demandData = pd.read_csv(demandData, encoding='latin-1', sep=';')
     demandData['Date'] = pd.to_datetime(demandData['Date'])
+
     st.session_state["demandData"] = demandData
 
 ###################################################################################################
