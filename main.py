@@ -145,9 +145,9 @@ elif method == 'KNN Multi-scenario':
                                                  'Conditional Value at Risk (CVaR)', 
                                                  'Worst Case Analysis'])
 elif method == 'Machine Learning':
-    ml_option = st.sidebar.selectbox('Machine Learning Options', ['Linear Regression', 'Random Forest',
-                                                                  'SVR', 'Neural Network', 'XGBoosting', 
-                                                                  'Lasso', 'Ridge'])
+    ml_option = st.sidebar.selectbox('Machine Learning Options', ['Linear Regression', 'Lasso', 'Ridge',
+                                                                  'Random Forest',
+                                                                  'SVR', 'Neural Network', 'XGBoosting'])
 max_num_nodes = st.sidebar.slider('Max number of points', min_value=3, max_value=40, value=15)
 
 ####################################################################################################
@@ -182,8 +182,6 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
         st.empty()
         st.session_state["result"] = result
     elif method == 'KNN Multi-scenario':
-        # st.warning('We are working on it', icon="🔧")
-        # st.stop()
         with st.spinner('Executing model'):
             result = kms.execute(k=k, option=ms_option,
                                 nodeData=nodeDataSelected, demandData=demandDataSelected, 
