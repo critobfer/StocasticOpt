@@ -3,8 +3,6 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import altair as alt
-import requests
-import io
 import folium # https://folium.streamlit.app/
 from streamlit_folium import st_folium 
 from streamlit_extras.dataframe_explorer import dataframe_explorer 
@@ -14,7 +12,6 @@ import methods.deterministic as det
 import methods.multi_scenario as ms
 import methods.knn_multi_scenario as kms
 import methods.machine_learning as ml
-from bs4 import BeautifulSoup
 
 ####################################################################################################
 # AUXILIAR FUNCTIONS     ###########################################################################
@@ -74,6 +71,7 @@ st.divider()
 # SIDE BAR CONFIGURATION ###########################################################################
 ####################################################################################################
 st.sidebar.header('Configuration', divider='red')
+
 
 ###################################################################################################
 # FILES                  ##########################################################################

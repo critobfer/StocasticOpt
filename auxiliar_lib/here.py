@@ -1,6 +1,8 @@
 import flexpolyline as fp
 import requests
 import streamlit as st
+import os
+from dotenv import load_dotenv
 
 def calculate_route_HERE(coordinates: list[tuple[float, float]]):
  # Function that calls the HERE API using a list of nodes and a vehicle type.
@@ -11,8 +13,10 @@ def calculate_route_HERE(coordinates: list[tuple[float, float]]):
 
     # returns
     # The coordinates of the route.
-    hereAPIKey_1 = 's2U71rkGXO4mXuRQmom6nRYXE01a-KnpHfhy6DRJDXI'  
-    hereAPIKey_2 = 'ZmuIUyPPUobvj5-Vate_oFaug3AL7VbwFZX5KX3S9Yc'
+    
+    load_dotenv()
+    hereAPIKey_1 = os.environ.get('API_KEY_1') 
+    hereAPIKey_2 = os.environ.get('API_KEY_2')
     url = "https://router.hereapi.com/v8/routes?&transportMode=truck"
     origenPoint = coordinates[0]
     origin = '&origin=' + str(origenPoint[0]) + ',' + str(origenPoint[1])  # Origin
