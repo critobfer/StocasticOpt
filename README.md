@@ -26,6 +26,39 @@ Then you can choose between the methods:
     - Worst Scenario 
 
 # Structure of the repository
+``requirements.txt``
+
+``main.py``
+## auxiliar_lib
+``ML_models.py``
+
+``here.py``
+
+``optimization_problem.py``
+
+## data
+``demandDataComplete.csv``
+
+``nodeData.csv``
+
+``study_data.ipynb``
+
+### bot
+``bot.ipynb``
+
+``merge_data.ipynb``
+
+### meteo
+``add_covariables.ipynb``
+
+## methods
+``deterministic.py``
+
+``knn_multi_scenario.py``
+
+``machine_learning.py``
+
+``multi_scenario.py``
 
 # Set up
 * You have to install the requirements.
