@@ -36,5 +36,5 @@ API_KEY_1='apikey1'
 API_KEY_2='apikey2'
 ``
 
-* Execute ```main.py``
+* Execute ``main.py``
 * To view this Streamlit app on a browser, you have to run a command like this  ``streamlit run c:/Users/.../StocasticOpt/main.py`` that you will see in a warning python after run ``main.py``
