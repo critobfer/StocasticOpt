@@ -103,7 +103,7 @@ def execute(option, nodeData, demandData, realDemand):
         'nodeDataSelected': nodeData,
         'demandDataSelected': demandData,
         'method': option,
-        'info': '_option'+str(option)
+        'info': '_option_'+str(option)
     }
 
     return result

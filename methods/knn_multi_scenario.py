@@ -50,7 +50,7 @@ def generate_data_scenarios(k, nodeData, demandData, realDemand):
 
     return points_ids, c, d, D, latitudes, longitudes, min_max_dist
 
-def execute(k, option, nodeData, demandData, realDemand):
+def execute(k, option, nodeData, demandData, realDemand, alpha):
     num_nodos = len(nodeData)
     codnodes, c, d, D, latitudes, longitudes, min_max_dist = generate_data_scenarios(k, nodeData, demandData, realDemand)
     # The first scenario has more probaility
@@ -58,11 +58,15 @@ def execute(k, option, nodeData, demandData, realDemand):
     total = sum(weight)
     prob = [w / total for w in weight] # To sum up 1
 
-    model, results = op.prize_collecting_TSP_multiscenario(num_nodos, c, d, D, k, prob, option)
+    model, results = op.prize_collecting_TSP_multiscenario(num_nodos, c, d, D, k, prob, option, alpha=alpha)
     real_d = realDemand['Pallets'].values
     x_sol, y_sol, u_sol, capacity_used, opt_value, total_distance = op.feed_solution_variables(model, num_nodos, real_d, c)
     codnodes_achived = [codnodes[i] for i in range(num_nodos) if y_sol[i] == 1]
     tour_coords = op.get_tour_cord(x_sol, latitudes, longitudes, num_nodos)
+    if option == 'Conditional Value at Risk (CVaR)':
+        extra_info = '_alpha_'+str(alpha)
+    else:
+        extra_info = ''
     result = {
         'codnodes_selected': codnodes,
         'num_nodes':len(codnodes),
@@ -80,7 +84,7 @@ def execute(k, option, nodeData, demandData, realDemand):
         'tour_coords': tour_coords,
         'nodeDataSelected': nodeData,
         'demandDataSelected': demandData,
-        'info': '_k'+str(k)+'_option'+str(option)
+        'info': '_k_'+str(k)+'_option_'+str(option)+extra_info
     }
 
     return result

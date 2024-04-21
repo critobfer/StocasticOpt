@@ -91,19 +91,6 @@ def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities,
             return sum(probabilities[s] * (sum(model.x[i, j] * c[i - 1][j - 1] for j in model.N) +
                                         (1 - model.y[i]) * d[s][i - 1]) for i in model.N for s in range(num_scenarios))
         model.OBJ = Objective(rule=obj_expression, sense=minimize) 
-    elif method == 'Minimum variance':
-        '''In this approach, one seeks to minimise the variability or dispersion in the outcomes under uncertainty. 
-        To achieve this, the objective function can be defined to minimise the variance of the outcomes weighted by 
-        the probabilities of the scenarios. Minimising variance implies reducing the dispersion of outcomes compared 
-        to the expectation maximisation approach. This is useful when one wants to minimise uncertainty or variability 
-        in the outcomes.'''
-        def obj_expression(model): # TODO: Ya no es lineal
-            mean = sum(probabilities[s] * (sum(model.x[i, j] * c[i - 1][j - 1] for j in model.N) +
-                                        (1 - model.y[i]) * d[s][i - 1]) for i in model.N for s in range(num_scenarios))
-            var = sum(probabilities[s] * (sum(model.x[i, j] * c[i - 1][j - 1] for j in model.N) +
-                                (1 - model.y[i]) * d[s][i - 1] - mean) ** 2 for i in model.N for s in range(num_scenarios))
-            return var
-        model.OBJ = Objective(rule=obj_expression, sense=minimize) 
     elif method == 'Conditional Value at Risk (CVaR)':
         '''Risk aversion implies a preference for more certain outcomes over more uncertain outcomes, 
         even if the uncertain outcomes have a higher profit potential. In the context of a stochastic 

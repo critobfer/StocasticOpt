@@ -40,8 +40,8 @@ def select_execution_data(demandData, nodeData, max_num_nodes, date, path):
     realDemand.to_csv(os.path.join(path, "realDemand.csv"), index=False)
     return nodeDataModel, demandDataModel, realDemand
 
-def create_path(date):
-    output_directory = os.path.join("output_files", date.strftime("%Y-%m-%d"))
+def create_path(date, max_num_nodes):
+    output_directory = os.path.join("output_files", date.strftime("%Y-%m-%d") + '_MAX_' + str(max_num_nodes))
     
     # Crear el directorio si no existe
     if not os.path.exists(output_directory):
@@ -165,11 +165,19 @@ if method == 'Multi-scenario':
     ms_option = st.sidebar.selectbox('Options', ['Maximum expectation', 
                                                  'Conditional Value at Risk (CVaR)', 
                                                  'Worst Case Analysis'])
+    if ms_option == 'Conditional Value at Risk (CVaR)':
+        alpha = st.sidebar.slider("Choose alpha ", min_value=0.0, max_value=1.0, step=0.05, value=0.8)
+    else:
+        alpha = 0
 elif method == 'KNN Multi-scenario':
     k = st.sidebar.number_input('Choose the number of neighbour', min_value=1, max_value=40, step=1, value=20)
     ms_option = st.sidebar.selectbox('Options', ['Maximum expectation', 
                                                  'Conditional Value at Risk (CVaR)', 
                                                  'Worst Case Analysis'])
+    if ms_option == 'Conditional Value at Risk (CVaR)':
+        alpha = st.sidebar.slider("Choose alpha ", min_value=0.0, max_value=1.0, step=0.05, value=0.8)
+    else:
+        alpha = 0
 elif method == 'Machine Learning':
     ml_option = st.sidebar.selectbox('Machine Learning Options', ['Linear Regression', 'Lasso', 'Ridge',
                                                                   'Random Forest',
@@ -188,7 +196,7 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
             st.warning('We need a demand data file', icon="⚠️")
         st.stop()
 
-    path = create_path(date)
+    path = create_path(date, max_num_nodes)
     nodeDataSelected, demandDataSelected, realDemand = select_execution_data(demandData, 
                                                                              nodeData, 
                                                                              max_num_nodes, 
@@ -207,14 +215,14 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
         with st.spinner('Executing model'):
             result = ms.execute(num_scenarios=num_scenarios, option=ms_option, 
                                 nodeData=nodeDataSelected, demandData=demandDataSelected, 
-                                realDemand=realDemand) 
+                                realDemand=realDemand, alpha = alpha) 
         st.empty()
         st.session_state["result"] = result
     elif method == 'KNN Multi-scenario':
         with st.spinner('Executing model'):
             result = kms.execute(k=k, option=ms_option,
                                 nodeData=nodeDataSelected, demandData=demandDataSelected, 
-                                realDemand=realDemand) 
+                                realDemand=realDemand, alpha = alpha) 
         st.empty()
         st.session_state["result"] = result
     elif method == 'Machine Learning':
