@@ -102,7 +102,8 @@ def execute(option, nodeData, demandData, realDemand):
         'tour_coords': tour_coords,
         'nodeDataSelected': nodeData,
         'demandDataSelected': demandData,
-        'method': option
+        'method': option,
+        'info': '_option'+str(option)
     }
 
     return result

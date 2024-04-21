@@ -54,7 +54,7 @@ def execute(k, option, nodeData, demandData, realDemand):
     num_nodos = len(nodeData)
     codnodes, c, d, D, latitudes, longitudes, min_max_dist = generate_data_scenarios(k, nodeData, demandData, realDemand)
     # The first scenario has more probaility
-    weight = [1 / (2**i) for i in range(1, k + 1)]
+    weight = [1 / i for i in range(1, k + 1)]
     total = sum(weight)
     prob = [w / total for w in weight] # To sum up 1
 
@@ -79,7 +79,8 @@ def execute(k, option, nodeData, demandData, realDemand):
         'optimum_value': opt_value,
         'tour_coords': tour_coords,
         'nodeDataSelected': nodeData,
-        'demandDataSelected': demandData
+        'demandDataSelected': demandData,
+        'info': '_k'+str(k)+'_option'+str(option)
     }
 
     return result

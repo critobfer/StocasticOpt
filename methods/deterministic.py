@@ -58,7 +58,8 @@ def execute(nodeData, realDemand, demandData):
         'optimum_value': opt_value,
         'tour_coords': tour_coords,
         'nodeDataSelected': nodeData,
-        'demandDataSelected': demandData
+        'demandDataSelected': demandData,
+        'info': ''
     }
 
     return result

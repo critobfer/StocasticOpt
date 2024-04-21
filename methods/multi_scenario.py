@@ -78,7 +78,8 @@ def execute(num_scenarios, option, nodeData, demandData, realDemand):
         'optimum_value': opt_value,
         'tour_coords': tour_coords,
         'nodeDataSelected': nodeData,
-        'demandDataSelected': demandData
+        'demandDataSelected': demandData,
+        'info': '_numsc'+str(num_scenarios)+'_option'+str(option)
     }
 
     return result

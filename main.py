@@ -12,12 +12,13 @@ import methods.deterministic as det
 import methods.multi_scenario as ms
 import methods.knn_multi_scenario as kms
 import methods.machine_learning as ml
+import os
 
 ####################################################################################################
 # AUXILIAR FUNCTIONS     ###########################################################################
 ####################################################################################################
 
-def select_execution_data(demandData, nodeData, max_num_nodes, date):
+def select_execution_data(demandData, nodeData, max_num_nodes, date, path):
     random.seed(10051347)
     codnode_list = list(demandData[demandData['Date'] == date]['codnode'].values)
     number_nodes = len(codnode_list)
@@ -33,8 +34,33 @@ def select_execution_data(demandData, nodeData, max_num_nodes, date):
     nodeDataModel = nodeDataModel.sort_values(by='codnode')
     demandDataModel = demandDataModel.sort_values(by='codnode')
     realDemand = realDemand.sort_values(by='codnode')
+
+    nodeDataModel.to_csv(os.path.join(path, "nodeDataSelected.csv"), index=False)
+    demandDataModel.to_csv(os.path.join(path, "demandDataSelected.csv"), index=False)
+    realDemand.to_csv(os.path.join(path, "realDemand.csv"), index=False)
     return nodeDataModel, demandDataModel, realDemand
 
+def create_path(date):
+    output_directory = os.path.join("output_files", date.strftime("%Y-%m-%d"))
+    
+    # Crear el directorio si no existe
+    if not os.path.exists(output_directory):
+        os.makedirs(output_directory)
+
+    return output_directory
+
+def add_path(path, method):
+    output_directory = os.path.join(path, method)
+    
+    # Crear el directorio si no existe
+    if not os.path.exists(output_directory):
+        os.makedirs(output_directory)
+
+    return output_directory
+
+def write_to_result_file(result_file_path, data):
+    with open(result_file_path, 'a') as file:
+        file.write(data + "\n")
 ####################################################################################################
 # AUXILIAR VARIABLES     ###########################################################################
 ####################################################################################################
@@ -162,10 +188,13 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
             st.warning('We need a demand data file', icon="⚠️")
         st.stop()
 
+    path = create_path(date)
     nodeDataSelected, demandDataSelected, realDemand = select_execution_data(demandData, 
                                                                              nodeData, 
                                                                              max_num_nodes, 
-                                                                             date)
+                                                                             date, path)
+    path_method = add_path(path, method)
+    st.session_state["path_method"] = path_method
 
     # Mostrar el spinner
     if method == 'Deterministic':
@@ -205,6 +234,8 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
 ####################################################################################################
 if "result" in st.session_state:
     result = st.session_state["result"]
+    result_file_path = os.path.join(st.session_state["path_method"], "result" + result['info'] +".txt")
+
     nodeDataSelected = result['nodeDataSelected']
     demandDataSelected = result['demandDataSelected']
     
@@ -217,14 +248,22 @@ if "result" in st.session_state:
     st.subheader(f'**Objective Function:** {round(result['total_distance'] +
                                             np.sum(result['nodes_demand']) - 
                                                   result['capacity_used'] ,2)}')
+    write_to_result_file(result_file_path, f'Objective Function: {round(result['total_distance'] +
+                                            np.sum(result['nodes_demand']) - 
+                                                  result['capacity_used'] ,2)}')
 
     col1, col2= st.columns(2)
     with col1:
         st.metric("Distance travelled", f'{round(result['total_distance'],2)}Km', "")
+        write_to_result_file(result_file_path, f'Distance travelled: {round(result['total_distance'],2)}Km')
     with col2:
         st.metric("Undelivered demand", f'{round(np.sum(result['nodes_demand'])
                                                - result['capacity_used'] ,2)} Pallets', "")
+        write_to_result_file(result_file_path, f'Undelivered demand: {round(np.sum(result['nodes_demand'])
+                                               - result['capacity_used'] ,2)} Pallets')
     st.markdown(f'***Method Objective function:*** {round(result['optimum_value'],2)}')
+    write_to_result_file(result_file_path, f'Method Objective function: {round(result['optimum_value'],2)}')
+
     ###################################################################################################
     # MAP                   ###########################################################################
     ###################################################################################################
@@ -278,14 +317,19 @@ if "result" in st.session_state:
     ###################################################################################################
     if 'nodes_predicted_demand' in result.keys():
         st.header('Prediction info for ' + str(result['method'])+ ':', divider='red')
+        write_to_result_file(result_file_path, f'Method Objective function: {round(result['optimum_value'],2)}')
+
 
         col1, col2, col3 = st.columns(3)
         with col1:
             st.markdown(f' 📈 MSE: **{round(result["MSE"], 2)}**')
+            write_to_result_file(result_file_path, f' MSE: {round(result["MSE"], 2)}')
         with col2:
             st.markdown(f' 📈 R2: **{round(result["R2"], 2)}**')
+            write_to_result_file(result_file_path, f' R2: {round(result["R2"], 2)}')
         with col3:
             st.markdown(f' 📈 MAE: **{round(result["MAE"], 2)}**')
+            write_to_result_file(result_file_path, f' MAE: {round(result["MAE"], 2)}')
         combined_data = []
         combined_data.append(('Real Demand',) + tuple(result['nodes_demand']))
         combined_data.append(('Predicted Demand',) + tuple(result['nodes_predicted_demand']))
@@ -304,6 +348,7 @@ if "result" in st.session_state:
         df_ml = df_ml.set_index('Variable').T
         df_ml.index = ['Node {}'.format(nodeDataSelected['codnode'].values[i]) 
                        for i in range(result['num_nodes'])]
+        df_ml.to_csv(os.path.join(st.session_state["path_method"], 'info' + result['info'] +".csv"), sep=',', header=True)
         st.dataframe(df_ml, use_container_width=True)
 
     ###################################################################################################
@@ -337,6 +382,7 @@ if "result" in st.session_state:
         df_ms = df_ms.set_index('Variable').T
         df_ms.index = ['Node {}'.format(nodeDataSelected['codnode'].values[i]) 
                        for i in range(result['num_nodes'])]
+        df_ms.to_csv(os.path.join(st.session_state["path_method"], 'info' + result['info'] +".csv"), sep=',', header=True)
         st.dataframe(df_ms, use_container_width=True, 
                      column_config={"distribution": 
                                     st.column_config.BarChartColumn("Demand Distribution", y_min=0, y_max=80),},)
@@ -366,6 +412,7 @@ if "result" in st.session_state:
         df_ms = df_ms.set_index('Variable').T
         df_ms.index = ['Node {}'.format(nodeDataSelected['codnode'].values[i]) 
                        for i in range(result['num_nodes'])]
+        df_ms.to_csv(os.path.join(st.session_state["path_method"], 'info' + result['info'] +".csv"), sep=',', header=True)
         st.dataframe(df_ms, use_container_width=True, 
                 column_config={"distribution": 
                             st.column_config.BarChartColumn("Demand Distribution", y_min=0, y_max=80),},)
@@ -376,16 +423,25 @@ if "result" in st.session_state:
     #################################################################################################
 
     st.header('Stadistics:', divider='red')
+    write_to_result_file(result_file_path, 'Stadistics:')
 
     st.markdown(f'🚚 Truck with a capacity of **{result['total_capacity']}** doing a distance of **{round(
         result['total_distance'],2)} Km**')
+    write_to_result_file(result_file_path, f'Truck with a capacity of {result['total_capacity']} doing a distance of {round(
+        result['total_distance'],2)} Km')
     st.markdown(f'**{result['num_visited']}** points have been visited using **{round(
         result['capacity_used'], 2)}** capacity unit')
+    write_to_result_file(result_file_path, f'{result['num_visited']} points have been visited using {round(
+        result['capacity_used'], 2)} capacity unit')
 
     # Compute percentages
     percentage_clients_delivered = (result['num_visited'] / result['num_nodes']) * 100
+    write_to_result_file(result_file_path, f'Percentage Clients Delivered: {percentage_clients_delivered}%')
     percentage_delivered = (result['capacity_used'] / np.sum(result['nodes_demand'])) * 100
+    write_to_result_file(result_file_path, f'Percentage Demand Delivered: {percentage_delivered}%')
     percentage_truck_filling = (result['capacity_used'] / result['total_capacity']) * 100
+    write_to_result_file(result_file_path, f'Percentage Truck Filling: {percentage_truck_filling}%')
+
     # Show Compute percentages
     chart_data = pd.DataFrame(
         [percentage_clients_delivered, percentage_delivered, percentage_truck_filling],
