@@ -49,8 +49,17 @@ def random_forest(X_train, X_test, y_train):
 
     X_train_trans = transformations.fit_transform(X_train)
     X_test_trans = transformations.transform(X_test)
+    param_grid = {
+        'n_estimators': [10, 20, 50, 100],
+    }
+    # Initialize GridSearchCV for hyperparameter tuning
+    grid_search = GridSearchCV(RandomForestRegressor(random_state=42), param_grid, cv=5)
+    grid_search.fit(X_train_trans, y_train)
+    print("Best Parameters:", grid_search.best_params_)
+    # Best model found by GridSearchCV
+    model = grid_search.best_estimator_
     # Inicializar y entrenar el modelo de regresión lineal
-    model = RandomForestRegressor(n_estimators=100, random_state=42)
+    # model = RandomForestRegressor(n_estimators=100, random_state=42)
     model.fit(X_train_trans, y_train)
     # Predecir en el conjunto de prueba
     demand_prediction = model.predict(X_test_trans)
@@ -121,8 +130,20 @@ def neural_network(X_train, X_test, y_train):
     X_train_trans = transformations.fit_transform(X_train)
     X_test_trans = transformations.transform(X_test)
     
+    param_grid = {
+        'alpha': [0.001, 0.01],
+        'activation': ['relu', 'logistic'],
+        'solver': ['adam', 'sgd']
+    }
+    
+    # Initialize GridSearchCV for hyperparameter tuning
+    grid_search = GridSearchCV(MLPRegressor(random_state=42), param_grid, cv=5)
+    grid_search.fit(X_train_trans, y_train)
+    
+    # Best model found by GridSearchCV
+    model = grid_search.best_estimator_
     # Inicializar y entrenar el modelo de redes neuronales
-    model = MLPRegressor(hidden_layer_sizes=(50, 50), activation='relu', solver='adam', random_state=42)
+    # model = MLPRegressor(hidden_layer_sizes=(50, 50), activation='relu', solver='adam', random_state=42)
     model.fit(X_train_trans, y_train)
     
     # Predecir en el conjunto de prueba
@@ -155,7 +176,18 @@ def xgboost_lgbm(X_train, X_test, y_train):
     X_test_trans = transformations.transform(X_test)
     
     # Inicializar y entrenar el modelo de XGBoost o LightGBM
-    model = XGBRegressor(n_estimators=100, learning_rate=0.1, random_state=42)
+    # model = XGBRegressor(n_estimators=100, learning_rate=0.1, random_state=42)
+    param_grid = {
+        'learning_rate': [0.01, 0.1, 0.3],
+        'max_depth': [3, 5]
+    }
+    
+    # Initialize GridSearchCV for hyperparameter tuning
+    grid_search = GridSearchCV(XGBRegressor(random_state=42), param_grid, cv=5)
+    grid_search.fit(X_train_trans, y_train)
+    
+    # Best model found by GridSearchCV
+    model = grid_search.best_estimator_
     model.fit(X_train_trans, y_train)
     
     # Predecir en el conjunto de prueba
@@ -186,8 +218,19 @@ def ridge_regression(X_train, X_test, y_train):
     X_test_trans = transformations.transform(X_test)
     
     # Inicializar y entrenar el modelo de regresión Ridge
-    model = Ridge(alpha=1.0, random_state=42)
+    param_grid = {
+        'alpha': [0.01, 0.1, 1, 10, 100]
+    }
+    
+    # Inicializar la búsqueda de hiperparámetros con validación cruzada
+    grid_search = GridSearchCV(Ridge(random_state=42), param_grid, cv=5)
+    grid_search.fit(X_train_trans, y_train)
+    
+    # Mejor modelo encontrado por GridSearchCV
+    model = grid_search.best_estimator_
     model.fit(X_train_trans, y_train)
+    # model = Ridge(alpha=1.0, random_state=42)
+    # model.fit(X_train_trans, y_train)
     
     # Predecir en el conjunto de prueba
     ridge_prediction = model.predict(X_test_trans)
@@ -220,8 +263,18 @@ def lasso_regression(X_train, X_test, y_train):
     X_test_trans = transformations.transform(X_test)
     
     # Inicializar y entrenar el modelo de regresión Lasso
-    model = Lasso(alpha=1.0, random_state=42)
-    model.fit(X_train_trans, y_train)
+    param_grid = {
+        'alpha': [0.01, 0.1, 1, 10, 100]
+    }
+    
+    # Inicializar la búsqueda de hiperparámetros con validación cruzada
+    grid_search = GridSearchCV(Lasso(random_state=42), param_grid, cv=5)
+    grid_search.fit(X_train_trans, y_train)
+    
+    # Mejor modelo encontrado por GridSearchCV
+    model = grid_search.best_estimator_
+    # model = Lasso(alpha=1.0, random_state=42)
+    # model.fit(X_train_trans, y_train)
     
     # Predecir en el conjunto de prueba
     lasso_prediction = model.predict(X_test_trans)
