@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 from datetime import datetime
 import altair as alt
 import folium # https://folium.streamlit.app/
@@ -394,6 +396,15 @@ if "result" in st.session_state:
         st.dataframe(df_ms, use_container_width=True, 
                      column_config={"distribution": 
                                     st.column_config.BarChartColumn("Demand Distribution", y_min=0, y_max=80),},)
+        ###################################################################################################
+        plt.style.use('ggplot')
+        plt.figure(figsize=(8, 4))
+        plt.hist(result['objective_function_value_multiscenario'], color='#ff4b4b', bins=15)
+        plt.xlabel('OF values')
+        plt.ylabel('num scenarios')
+        plt.title('Histogram OF values' + result['title'])
+        plt.savefig(os.path.join(st.session_state["path_method"], 'hist' + result['info'] + '.svg'))
+        st.pyplot()
     elif 'k' in  result.keys():
         st.header(f'Simulation info for {result['k']} Nearest Neighbour:', divider='red')
         d_ms = result['nodes_demand_multiscenario']

@@ -52,20 +52,28 @@ def generate_data_scenarios(num_scenarios, nodeData, demandData):
 
     return points_ids, c, d, D, latitudes, longitudes, params_simulation
 
+def get_scenarios_OF_value(model, num_scenarios):
+    of_values = [None for _ in range(num_scenarios)]
+    for s in range(num_scenarios):
+        of_values[s] = model.PI[s+1].value
+    return of_values
+
 def execute(num_scenarios, option, nodeData, demandData, realDemand, alpha):
     num_nodos = len(nodeData)
     codnodes, c, d, D, latitudes, longitudes, params_simulation= generate_data_scenarios(num_scenarios, nodeData, demandData)
     prob = [1/num_scenarios for _ in range(num_scenarios)]
     model, results = op.prize_collecting_TSP_multiscenario(num_nodos, c, d, D, num_scenarios, prob, option, alpha=alpha)
     real_d = realDemand['Pallets'].values
+    of_values = get_scenarios_OF_value(model, num_scenarios)
     x_sol, y_sol, u_sol, capacity_used, opt_value, total_distance = op.feed_solution_variables(model, num_nodos, real_d, c)
     codnodes_achived = [codnodes[i] for i in range(num_nodos) if y_sol[i] == 1]
     tour_coords = op.get_tour_cord(x_sol, latitudes, longitudes, num_nodos)
-    d_array = np.array(d)
     if option == 'Conditional Value at Risk (CVaR)':
         extra_info = '_alpha_'+str(alpha)
+        title = ' with alpha '+str(alpha) 
     else:
         extra_info = ''
+        title = ''
     result = {
         'codnodes_selected': codnodes,
         'num_nodes':len(codnodes),
@@ -77,13 +85,15 @@ def execute(num_scenarios, option, nodeData, demandData, realDemand, alpha):
         'nodes_demand': real_d, # [np.mean([d_array[s][i] for s in range(num_scenarios)]) for i in range(num_nodos)],
         'num_scenarios':num_scenarios,
         'nodes_demand_multiscenario': d,
+        'objective_function_value_multiscenario': of_values,
         'params_simulations': params_simulation,
         'distance_matrix': c,
         'optimum_value': opt_value,
         'tour_coords': tour_coords,
         'nodeDataSelected': nodeData,
         'demandDataSelected': demandData,
-        'info': '_numsc_'+str(num_scenarios)+'_option_'+str(option)+extra_info
+        'info': '_numsc_'+str(num_scenarios)+'_option_'+str(option)+extra_info,
+        'title':title
     }
 
     return result
