@@ -104,17 +104,6 @@ st.sidebar.header('Configuration', divider='red')
 ###################################################################################################
 # FILES                  ##########################################################################
 ###################################################################################################
-# Select file from computer
-# nodeData = st.sidebar.file_uploader(":open_file_folder: Node File", type=["csv"])
-# if nodeData is not None:
-#     nodeData = pd.read_csv(nodeData, encoding='latin-1', sep=';')
-#     st.session_state["nodeData"] = nodeData
-# demandData = st.sidebar.file_uploader(":open_file_folder: Demand File", type=["csv"])
-# if demandData is not None:
-#     demandData = pd.read_csv(demandData, encoding='latin-1', sep=';')
-#     demandData['Date'] = pd.to_datetime(demandData['Date'])
-#     st.session_state["demandData"] = demandData
-
 # Get file from github
 nodeData_github_link = "https://raw.githubusercontent.com/critobfer/StocasticOpt/main/data/nodeData.csv"
 demandData_github_link = "https://raw.githubusercontent.com/critobfer/StocasticOpt/main/data/demandDataComplete.csv"
@@ -165,8 +154,8 @@ st.sidebar.subheader('Parameters', divider='red')
 if method == 'Multi-scenario':
     num_scenarios = st.sidebar.number_input('Number of Scenarios', min_value=1, step=1, value=30)
     ms_option = st.sidebar.selectbox('Options', ['Maximum expectation', 
-                                                 'Conditional Value at Risk (CVaR)', 
-                                                 'Worst Case Analysis'])
+                                                'Conditional Value at Risk (CVaR)', 
+                                                'Worst Case Analysis'])
     if ms_option == 'Conditional Value at Risk (CVaR)':
         alpha = st.sidebar.slider("Choose alpha ", min_value=0.0, max_value=1.0, step=0.05, value=0.8)
     else:
@@ -174,16 +163,16 @@ if method == 'Multi-scenario':
 elif method == 'KNN Multi-scenario':
     k = st.sidebar.number_input('Choose the number of neighbour', min_value=1, max_value=40, step=1, value=20)
     ms_option = st.sidebar.selectbox('Options', ['Maximum expectation', 
-                                                 'Conditional Value at Risk (CVaR)', 
-                                                 'Worst Case Analysis'])
+                                                'Conditional Value at Risk (CVaR)', 
+                                                'Worst Case Analysis'])
     if ms_option == 'Conditional Value at Risk (CVaR)':
         alpha = st.sidebar.slider("Choose alpha ", min_value=0.0, max_value=1.0, step=0.05, value=0.8)
     else:
         alpha = 0
 elif method == 'Machine Learning':
     ml_option = st.sidebar.selectbox('Machine Learning Options', ['Linear Regression', 'Lasso', 'Ridge',
-                                                                  'Random Forest',
-                                                                  'SVR', 'Neural Network', 'XGBoosting'])
+                                                                'Random Forest',
+                                                                'SVR', 'Neural Network', 'XGBoosting'])
 max_num_nodes = st.sidebar.slider('Max number of points', min_value=3, max_value=40, value=15)
 
 ####################################################################################################
@@ -200,9 +189,9 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
 
     path = create_path(date, max_num_nodes)
     nodeDataSelected, demandDataSelected, realDemand = select_execution_data(demandData, 
-                                                                             nodeData, 
-                                                                             max_num_nodes, 
-                                                                             date, path)
+                                                                            nodeData, 
+                                                                            max_num_nodes, 
+                                                                            date, path)
     path_method = add_path(path, method)
     st.session_state["path_method"] = path_method
 
@@ -210,7 +199,7 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
     if method == 'Deterministic':
         with st.status('Executing', expanded=True) as status:
             result = det.execute(nodeData=nodeDataSelected, realDemand=realDemand, 
-                                 demandData=demandDataSelected) 
+                                demandData=demandDataSelected) 
             status.update(label="Executed!", state="complete", expanded=False)
         st.empty()
         st.session_state["result"] = result
@@ -260,10 +249,10 @@ if "result" in st.session_state:
     # Show Objective Function
     st.subheader(f'**Objective Function:** {round(result['total_distance'] +
                                             np.sum(result['nodes_demand']) - 
-                                                  result['capacity_used'] ,2)}')
+                                                result['capacity_used'] ,2)}')
     write_to_result_file(result_file_path, f'Objective Function: {round(result['total_distance'] +
                                             np.sum(result['nodes_demand']) - 
-                                                  result['capacity_used'] ,2)}')
+                                                result['capacity_used'] ,2)}')
 
     col1, col2= st.columns(2)
     with col1:
@@ -271,9 +260,9 @@ if "result" in st.session_state:
         write_to_result_file(result_file_path, f'Distance travelled: {round(result['total_distance'],2)}Km')
     with col2:
         st.metric("Undelivered demand", f'{round(np.sum(result['nodes_demand'])
-                                               - result['capacity_used'] ,2)} Pallets', "")
+                                            - result['capacity_used'] ,2)} Pallets', "")
         write_to_result_file(result_file_path, f'Undelivered demand: {round(np.sum(result['nodes_demand'])
-                                               - result['capacity_used'] ,2)} Pallets')
+                                            - result['capacity_used'] ,2)} Pallets')
     st.markdown(f'***Method Objective function:*** {round(result['optimum_value'],2)}')
     write_to_result_file(result_file_path, f'Method Objective function: {round(result['optimum_value'],2)}')
 
@@ -310,7 +299,7 @@ if "result" in st.session_state:
         # We convert into a hasheable in order to use the session
         tour_coords = [tuple(coord) for coord in result['tour_coords']]
         try:
-            i=a #TODO: Quitar
+            # i=a 
             if ('tour_coords' not in st.session_state) or (tour_coords != st.session_state['tour_coords']):
                 coordinates = here.calculate_route_HERE(tour_coords)
                 st.session_state['tour_coords'] = tour_coords

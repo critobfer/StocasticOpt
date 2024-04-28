@@ -35,8 +35,8 @@ def generate_data_scenarios(k, nodeData, demandData, realDemand):
         y_train = demandNode['Pallets']
         X_test = realDemandNode.drop(['Pallets', 'codnode'], axis=1)
         neighbors_demand_values, min_dist, max_dist = models.get_knn_demand(k, X_train, X_test, y_train)
-        for i in range(k):
-            d[i].append(neighbors_demand_values[i])
+        for s in range(k):
+            d[s].append(neighbors_demand_values[s])
         min_max_dist.append([min_dist, max_dist])
         i+=1
         my_bar.progress(i/n, text=progress_text)

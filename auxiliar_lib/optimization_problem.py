@@ -63,7 +63,6 @@ def prize_collecting_TSP(n, c, d, D):
     logger.info('With ' + str(n) + ' points: '+ str(end-start) + 's')
     logger.info('######################################################')
 
-    print(results.Problem._list)
     time.sleep(10)
 
     return model, results
