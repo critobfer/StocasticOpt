@@ -405,6 +405,7 @@ if "result" in st.session_state:
         plt.title('Histogram OF values' + result['title'])
         plt.savefig(os.path.join(st.session_state["path_method"], 'hist' + result['info'] + '.svg'))
         st.pyplot()
+        
     elif 'k' in  result.keys():
         st.header(f'Simulation info for {result['k']} Nearest Neighbour:', divider='red')
         d_ms = result['nodes_demand_multiscenario']

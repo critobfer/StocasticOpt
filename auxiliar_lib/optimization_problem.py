@@ -87,6 +87,12 @@ def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities,
         maximise the weighted sum of the outcomes of each scenario, where the weights are the probabilities of 
         occurrence of the scenarios. This approach is appropriate when the main objective is to obtain the best 
         possible average outcome, regardless of the variability in the outcomes.'''
+        model.PI = Var(model.S) #cvar auxiliary variable
+        #definition of OF per scenario
+        def of_cv_cons(model,s):
+            return model.PI[s] - sum(sum(model.x[i,j]*c[i-1][j-1] for j in model.N) for i in model.N) - sum((1-model.y[i])*d[s-1][i-1] for i in model.N) == 0
+        model.costcv_cons_cons = Constraint(model.S, rule=of_cv_cons)
+
         def obj_expression(model): 
             return sum(probabilities[s] * (sum(model.x[i, j] * c[i - 1][j - 1] for j in model.N) +
                                         (1 - model.y[i]) * d[s][i - 1]) for i in model.N for s in range(num_scenarios))
@@ -117,6 +123,12 @@ def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities,
         model.OBJ = Objective(rule=obj_expression, sense=minimize) 
     elif method == 'Worst Case Analysis':
         model.t = Var() #worst case cost scenario
+        model.PI = Var(model.S) #cvar auxiliary variable
+        #definition of OF per scenario
+        def of_cv_cons(model,s):
+            return model.PI[s] - sum(sum(model.x[i,j]*c[i-1][j-1] for j in model.N) for i in model.N) - sum((1-model.y[i])*d[s-1][i-1] for i in model.N) == 0
+        model.costcv_cons_cons = Constraint(model.S, rule=of_cv_cons)
+
 
         #definition of OF per scenario
         def worst_case_cons(model,s):
