@@ -57,12 +57,14 @@ def prize_collecting_TSP(n, c, d, D):
     model.capacity_Constraint = Constraint(model.N, rule=capacity)
 
     start = time.time()
-    results = opt.solve(model,tee=True)
+    results = opt.solve(model,tee=True, options={'TimeLimit': 300})
     end  = time.time()
     logger.info('######################################################')
     logger.info('With ' + str(n) + ' points: '+ str(end-start) + 's')
     logger.info('######################################################')
 
+    print(results.Problem._list)
+    time.sleep(10)
 
     return model, results
 
@@ -170,7 +172,7 @@ def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities,
     model.capacity_Constraint = Constraint(model.N, range(num_scenarios), rule=capacity)
 
     start = time.time()
-    results = opt.solve(model, tee=True)
+    results = opt.solve(model,tee=True, options={'TimeLimit': 300})
     end  = time.time()
     logger.info('######################################################')
     logger.info('With ' + str(n) + ' points: '+ str(end-start) + 's')

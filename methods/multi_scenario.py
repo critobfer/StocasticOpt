@@ -3,6 +3,7 @@ import logging
 import auxiliar_lib.optimization_problem as op
 import numpy as np
 from scipy.stats import lognorm
+import streamlit as st
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -18,6 +19,8 @@ def generate_data_scenarios(num_scenarios, nodeData, demandData):
     d = [[] for _ in range(num_scenarios)]
     params_simulation = []
     i = 0
+    progress_text = "Generating scenarios for each node. Please wait."
+    my_bar = st.progress(i, text=progress_text)
     for codnode in points_ids:
         node = nodeData[nodeData['codnode'] == codnode] 
         logger.info('We generate data from point ' + str(i))
@@ -38,6 +41,7 @@ def generate_data_scenarios(num_scenarios, nodeData, demandData):
         for s in range(num_scenarios):
             d[s].append(np.exp(sample[s]))
         i+=1
+        my_bar.progress(i/n, text=progress_text)
 
     # Cost matrix, in this case distance
     D = 150*n
@@ -60,9 +64,11 @@ def get_scenarios_OF_value(model, num_scenarios):
 
 def execute(num_scenarios, option, nodeData, demandData, realDemand, alpha):
     num_nodos = len(nodeData)
+    st.write("Generating scenarios...")
     codnodes, c, d, D, latitudes, longitudes, params_simulation= generate_data_scenarios(num_scenarios, nodeData, demandData)
     prob = [1/num_scenarios for _ in range(num_scenarios)]
-    model, results = op.prize_collecting_TSP_multiscenario(num_nodos, c, d, D, num_scenarios, prob, option, alpha=alpha)
+    st.write('Running optimization...')
+    model, _ = op.prize_collecting_TSP_multiscenario(num_nodos, c, d, D, num_scenarios, prob, option, alpha=alpha)
     real_d = realDemand['Pallets'].values
     of_values = get_scenarios_OF_value(model, num_scenarios)
     x_sol, y_sol, u_sol, capacity_used, opt_value, total_distance = op.feed_solution_variables(model, num_nodos, real_d, c)

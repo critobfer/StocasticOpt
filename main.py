@@ -208,23 +208,26 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
 
     # Mostrar el spinner
     if method == 'Deterministic':
-        with st.spinner('Executing model'):
+        with st.status('Executing', expanded=True) as status:
             result = det.execute(nodeData=nodeDataSelected, realDemand=realDemand, 
                                  demandData=demandDataSelected) 
+            status.update(label="Executed!", state="complete", expanded=False)
         st.empty()
         st.session_state["result"] = result
     elif method == 'Multi-scenario':
-        with st.spinner('Executing model'):
+        with st.status('Executing', expanded=True) as status:
             result = ms.execute(num_scenarios=num_scenarios, option=ms_option, 
                                 nodeData=nodeDataSelected, demandData=demandDataSelected, 
-                                realDemand=realDemand, alpha = alpha) 
+                                realDemand=realDemand, alpha = alpha)
+            status.update(label="Executed!", state="complete", expanded=False) 
         st.empty()
         st.session_state["result"] = result
     elif method == 'KNN Multi-scenario':
-        with st.spinner('Executing model'):
+        with st.status('Executing', expanded=True) as status:
             result = kms.execute(k=k, option=ms_option,
                                 nodeData=nodeDataSelected, demandData=demandDataSelected, 
                                 realDemand=realDemand, alpha = alpha) 
+            status.update(label="Executed!", state="complete", expanded=False)
         st.empty()
         st.session_state["result"] = result
     elif method == 'Machine Learning':

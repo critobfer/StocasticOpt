@@ -10,7 +10,7 @@ import numpy as np
 from sklearn.neighbors import KNeighborsRegressor
 
 
-def linear_regresion(X_train, X_test, y_train):
+def linear_regresion(X_train, X_test, y_train, codnode):
     result = {}
     transformations = ColumnTransformer([
         ('encoder', OneHotEncoder(), ['ZIPcod', 'Day Of Week', 'Tomorrow Holiday'])
@@ -41,7 +41,7 @@ def linear_regresion(X_train, X_test, y_train):
     return result
 
 
-def random_forest(X_train, X_test, y_train):
+def random_forest(X_train, X_test, y_train, codnode):
     result = {}
     transformations = ColumnTransformer([
         ('encoder', OneHotEncoder(), ['ZIPcod', 'Day Of Week', 'Tomorrow Holiday'])
@@ -81,7 +81,7 @@ def random_forest(X_train, X_test, y_train):
     return result
 
 
-def svm(X_train, X_test, y_train):
+def svm(X_train, X_test, y_train, codnode):
     result = {}
 
     cathegorical = ['ZIPcod', 'Day Of Week', 'Tomorrow Holiday']
@@ -121,7 +121,7 @@ def svm(X_train, X_test, y_train):
 
     return result
 
-def neural_network(X_train, X_test, y_train):
+def neural_network(X_train, X_test, y_train, codnode):
     result = {}
     transformations = ColumnTransformer([
         ('encoder', OneHotEncoder(), ['ZIPcod', 'Day Of Week', 'Tomorrow Holiday'])
@@ -166,7 +166,8 @@ def neural_network(X_train, X_test, y_train):
     return result
 
 
-def xgboost_lgbm(X_train, X_test, y_train):
+def xgboost_lgbm(X_train, X_test, y_train, codnode):
+    
     result = {}
     transformations = ColumnTransformer([
         ('encoder', OneHotEncoder(), ['ZIPcod', 'Day Of Week', 'Tomorrow Holiday'])
@@ -208,7 +209,7 @@ def xgboost_lgbm(X_train, X_test, y_train):
     return result
 
 
-def ridge_regression(X_train, X_test, y_train):
+def ridge_regression(X_train, X_test, y_train, codnode):
     result = {}
     transformations = ColumnTransformer([
         ('encoder', OneHotEncoder(), ['ZIPcod', 'Day Of Week', 'Tomorrow Holiday'])
@@ -253,7 +254,7 @@ def ridge_regression(X_train, X_test, y_train):
     return result
 
 
-def lasso_regression(X_train, X_test, y_train):
+def lasso_regression(X_train, X_test, y_train, codnode):
     result = {}
     transformations = ColumnTransformer([
         ('encoder', OneHotEncoder(), ['ZIPcod', 'Day Of Week', 'Tomorrow Holiday'])
@@ -296,8 +297,7 @@ def lasso_regression(X_train, X_test, y_train):
     return result
 
 
-
-def get_knn_demand(k, X_train, X_test, y_train):
+def get_knn_demand(k, X_train, X_test, y_train, codnode = 0):
     transformations = ColumnTransformer([
         ('encoder', OneHotEncoder(), ['ZIPcod', 'Day Of Week', 'Tomorrow Holiday'])
     ], remainder='passthrough')

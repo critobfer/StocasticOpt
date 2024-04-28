@@ -4,6 +4,8 @@ import auxiliar_lib.optimization_problem as op
 import numpy as np
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 import auxiliar_lib.ML_models as models
+import streamlit as st
+
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -23,6 +25,8 @@ def predict_demand(nodeData, demandData, realDemand, method):
     n_train = []
     model_resutls = []
     i = 0
+    progress_text = "Training Machine Learning Models for each node. Please wait."
+    my_bar = st.progress(i, text=progress_text)
     for codnode in points_ids:
         node = nodeData[nodeData['codnode'] == codnode] 
         logger.info('We generate data from point ' + str(i))
@@ -36,25 +40,28 @@ def predict_demand(nodeData, demandData, realDemand, method):
         X_train = demandNode.drop(['Pallets', 'codnode'], axis=1)
         y_train = demandNode['Pallets']
         X_test = realDemandNode.drop(['Pallets', 'codnode'], axis=1)
+
         if method == 'Linear Regression':
-            result = models.linear_regresion(X_train=X_train, X_test=X_test, y_train=y_train)
+            result = models.linear_regresion(X_train=X_train, X_test=X_test, y_train=y_train, codnode=codnode)
         elif method == 'Random Forest':
-            result = models.random_forest(X_train=X_train, X_test=X_test, y_train=y_train)
+            result = models.random_forest(X_train=X_train, X_test=X_test, y_train=y_train, codnode=codnode)
         elif method == 'SVR':
-            result = models.svm(X_train=X_train, X_test=X_test, y_train=y_train)
+            result = models.svm(X_train=X_train, X_test=X_test, y_train=y_train, codnode=codnode)
         elif method == 'Neural Network':
-            result = models.neural_network(X_train=X_train, X_test=X_test, y_train=y_train)
+            result = models.neural_network(X_train=X_train, X_test=X_test, y_train=y_train, codnode=codnode)
         elif method == 'XGBoosting':
-            result = models.xgboost_lgbm(X_train=X_train, X_test=X_test, y_train=y_train)
+            result = models.xgboost_lgbm(X_train=X_train, X_test=X_test, y_train=y_train, codnode=codnode)
         elif method == 'Lasso':
-            result = models.lasso_regression(X_train=X_train, X_test=X_test, y_train=y_train)
+            result = models.lasso_regression(X_train=X_train, X_test=X_test, y_train=y_train, codnode=codnode)
         elif method == 'Ridge':
-            result = models.ridge_regression(X_train=X_train, X_test=X_test, y_train=y_train)
+            result = models.ridge_regression(X_train=X_train, X_test=X_test, y_train=y_train, codnode=codnode)
 
         d.append(result['prediction'])
         n_train.append(len(X_train))
         model_resutls.append(result)
         i+=1
+        my_bar.progress(i/n, text=progress_text)
+
 
     # Cost matrix, in this case distance
     D = 150*n
@@ -72,7 +79,9 @@ def predict_demand(nodeData, demandData, realDemand, method):
 
 def execute(option, nodeData, demandData, realDemand):
     num_nodos = len(nodeData)
+    st.write("Predicting demand...")
     codnodes, c, d, D, latitudes, longitudes, n_train, model_resutls = predict_demand(nodeData, demandData, realDemand, option)
+    st.write('Running optimization...')
     model, _ = op.prize_collecting_TSP(num_nodos, c, d, D)
     real_d = realDemand['Pallets'].values
     x_sol, y_sol, _, capacity_used, opt_value, total_distance = op.feed_solution_variables(model, num_nodos, real_d, c)

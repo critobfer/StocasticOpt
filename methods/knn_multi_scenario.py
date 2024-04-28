@@ -2,6 +2,7 @@ from geopy.distance import geodesic
 import logging
 import auxiliar_lib.optimization_problem as op
 import auxiliar_lib.ML_models as models
+import streamlit as st
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -18,6 +19,8 @@ def generate_data_scenarios(k, nodeData, demandData, realDemand):
     d = [[] for _ in range(k)]
     min_max_dist = []
     i = 0
+    progress_text = "Training KNN to generate scenarios for each node. Please wait."
+    my_bar = st.progress(i, text=progress_text)
     for codnode in points_ids:
         node = nodeData[nodeData['codnode'] == codnode] 
         logger.info('We generate data from point ' + str(i))
@@ -36,7 +39,7 @@ def generate_data_scenarios(k, nodeData, demandData, realDemand):
             d[i].append(neighbors_demand_values[i])
         min_max_dist.append([min_dist, max_dist])
         i+=1
-
+        my_bar.progress(i/n, text=progress_text)
     # Cost matrix, in this case distance
     D = 150*n
     c = [[0] * n for _ in range(n)]
@@ -52,15 +55,16 @@ def generate_data_scenarios(k, nodeData, demandData, realDemand):
 
 def execute(k, option, nodeData, demandData, realDemand, alpha):
     num_nodos = len(nodeData)
+    st.write("Generating scenarios...")
     codnodes, c, d, D, latitudes, longitudes, min_max_dist = generate_data_scenarios(k, nodeData, demandData, realDemand)
     # The first scenario has more probaility
     weight = [1 / i for i in range(1, k + 1)]
     total = sum(weight)
     prob = [w / total for w in weight] # To sum up 1
-
-    model, results = op.prize_collecting_TSP_multiscenario(num_nodos, c, d, D, k, prob, option, alpha=alpha)
+    st.write('Running optimization...')
+    model, _ = op.prize_collecting_TSP_multiscenario(num_nodos, c, d, D, k, prob, option, alpha=alpha)
     real_d = realDemand['Pallets'].values
-    x_sol, y_sol, u_sol, capacity_used, opt_value, total_distance = op.feed_solution_variables(model, num_nodos, real_d, c)
+    x_sol, y_sol, _, capacity_used, opt_value, total_distance = op.feed_solution_variables(model, num_nodos, real_d, c)
     codnodes_achived = [codnodes[i] for i in range(num_nodos) if y_sol[i] == 1]
     tour_coords = op.get_tour_cord(x_sol, latitudes, longitudes, num_nodos)
     if option == 'Conditional Value at Risk (CVaR)':
