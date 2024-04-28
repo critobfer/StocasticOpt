@@ -220,11 +220,11 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
         st.empty()
         st.session_state["result"] = result
     elif method == 'Machine Learning':
-
-        with st.spinner('Executing model'):
+        with st.status('Executing', expanded=True) as status:
             result = ml.execute(option=ml_option, nodeData=nodeDataSelected, 
                                 demandData=demandDataSelected,
-                                realDemand=realDemand) 
+                                realDemand=realDemand)
+            status.update(label="Executed!", state="complete", expanded=False) 
         st.empty()
         st.session_state["result"] = result
     else:
