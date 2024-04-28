@@ -8,8 +8,8 @@ logger.setLevel(logging.INFO)
 
 def generate_data_scenarios(k, nodeData, demandData, realDemand):
     # CLEAN THE DATE
-    demandData = demandData.drop(['Date', 'Year'], axis=1)
-    realDemand = realDemand.drop(['Date', 'Year'], axis=1)
+    demandData = demandData.drop(['Date', 'Year', 'Holiday'], axis=1)
+    realDemand = realDemand.drop(['Date', 'Year', 'Holiday'], axis=1)
     # DATA GENERATION
     points_ids = nodeData['codnode'].values
     n = len(points_ids)

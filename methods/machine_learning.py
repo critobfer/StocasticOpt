@@ -11,8 +11,8 @@ logger.setLevel(logging.INFO)
 def predict_demand(nodeData, demandData, realDemand, method):
     np.random.seed(100513471)
     # CLEAN THE DATE
-    demandData = demandData.drop(['Date', 'Year'], axis=1)
-    realDemand = realDemand.drop(['Date', 'Year'], axis=1)
+    demandData = demandData.drop(['Date', 'Year', 'Holiday'], axis=1)
+    realDemand = realDemand.drop(['Date', 'Year', 'Holiday'], axis=1)
     
     # DATA GENERATION
     points_ids = nodeData['codnode'].values
@@ -69,12 +69,13 @@ def predict_demand(nodeData, demandData, realDemand, method):
 
     return points_ids, c, d, D, latitudes, longitudes, n_train, model_resutls
 
+
 def execute(option, nodeData, demandData, realDemand):
     num_nodos = len(nodeData)
     codnodes, c, d, D, latitudes, longitudes, n_train, model_resutls = predict_demand(nodeData, demandData, realDemand, option)
-    model, results = op.prize_collecting_TSP(num_nodos, c, d, D)
+    model, _ = op.prize_collecting_TSP(num_nodos, c, d, D)
     real_d = realDemand['Pallets'].values
-    x_sol, y_sol, u_sol, capacity_used, opt_value, total_distance = op.feed_solution_variables(model, num_nodos, real_d, c)
+    x_sol, y_sol, _, capacity_used, opt_value, total_distance = op.feed_solution_variables(model, num_nodos, real_d, c)
     codnodes_achived = [codnodes[i] for i in range(num_nodos) if y_sol[i] == 1]
     tour_coords = op.get_tour_cord(x_sol, latitudes, longitudes, num_nodos)
     # Conpute metrics:
