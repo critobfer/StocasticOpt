@@ -1,6 +1,7 @@
 from geopy.distance import geodesic
 import logging
 import auxiliar_lib.optimization_problem as op
+import streamlit as st
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -40,6 +41,7 @@ def read_data(nodeData, demandData):
 def execute(nodeData, realDemand, demandData):
     num_nodos = len(nodeData)
     codnodes, c, d, D, latitudes, longitudes= read_data(nodeData, realDemand)
+    st.write('Running optimization...')
     model, results = op.prize_collecting_TSP(num_nodos, c, d, D)
     x_sol, y_sol, u_sol, capacity_used, opt_value, total_distance = op.feed_solution_variables(model, num_nodos, d, c)
     codnodes_achived = [codnodes[i] for i in range(num_nodos) if y_sol[i] == 1]

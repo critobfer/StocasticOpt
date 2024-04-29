@@ -201,7 +201,7 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
             result = det.execute(nodeData=nodeDataSelected, realDemand=realDemand, 
                                 demandData=demandDataSelected) 
             status.update(label="Executed!", state="complete", expanded=False)
-        st.empty()
+        # st.empty()
         st.session_state["result"] = result
     elif method == 'Multi-scenario':
         with st.status('Executing', expanded=True) as status:
@@ -209,7 +209,7 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
                                 nodeData=nodeDataSelected, demandData=demandDataSelected, 
                                 realDemand=realDemand, alpha = alpha)
             status.update(label="Executed!", state="complete", expanded=False) 
-        st.empty()
+        # st.empty()
         st.session_state["result"] = result
     elif method == 'KNN Multi-scenario':
         with st.status('Executing', expanded=True) as status:
@@ -217,7 +217,7 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
                                 nodeData=nodeDataSelected, demandData=demandDataSelected, 
                                 realDemand=realDemand, alpha = alpha) 
             status.update(label="Executed!", state="complete", expanded=False)
-        st.empty()
+        # st.empty()
         st.session_state["result"] = result
     elif method == 'Machine Learning':
         with st.status('Executing', expanded=True) as status:
@@ -225,7 +225,7 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
                                 demandData=demandDataSelected,
                                 realDemand=realDemand)
             status.update(label="Executed!", state="complete", expanded=False) 
-        st.empty()
+        # st.empty()
         st.session_state["result"] = result
     else:
         st.warning('We are working on it', icon="🔧")
@@ -299,7 +299,7 @@ if "result" in st.session_state:
         # We convert into a hasheable in order to use the session
         tour_coords = [tuple(coord) for coord in result['tour_coords']]
         try:
-            # i=a 
+            i=a 
             if ('tour_coords' not in st.session_state) or (tour_coords != st.session_state['tour_coords']):
                 coordinates = here.calculate_route_HERE(tour_coords)
                 st.session_state['tour_coords'] = tour_coords

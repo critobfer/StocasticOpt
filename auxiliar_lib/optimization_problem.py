@@ -3,12 +3,28 @@ from pyomo.opt import SolverFactory
 import logging
 import time
 import numpy as np
+import streamlit as st
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+def my_callback(model, solver, where):
+    # https://www.gurobi.com/documentation/current/refman/cb_codes.html
+    # MIPSOL	4	Found a new MIP incumbent
+    if where == 4:
+        st.write('  New MIP incumbent found')
+    # try:
+    #     Incumbent = solver.get_model_attr('ObjCon')
+    #     obj_val = solver.get_model_attr('ObjVal')
+    #     gap = round((Incumbent - obj_val)/ Incumbent*100,2)
+    #     st.write(f"First Gap: {gap}%")
+    #     print('Hola')
+    # except Exception as e:
+    #     a = 1
+
 def prize_collecting_TSP(n, c, d, D):
-    opt = SolverFactory("gurobi")
+
+    opt = SolverFactory("gurobi_persistent")
 
     model = ConcreteModel()
 
@@ -57,18 +73,24 @@ def prize_collecting_TSP(n, c, d, D):
     model.capacity_Constraint = Constraint(model.N, rule=capacity)
 
     start = time.time()
-    results = opt.solve(model,tee=True, options={'TimeLimit': 300})
+    opt.set_instance(model)
+    # opt.set_callback(my_callback)
+
+    results = opt.solve(tee=True, options={'TimeLimit': 30})
     end  = time.time()
     logger.info('######################################################')
     logger.info('With ' + str(n) + ' points: '+ str(end-start) + 's')
     logger.info('######################################################')
-
-    time.sleep(10)
+    if opt.get_model_attr('Status') != 2:
+        st.warning("Suboptimal Solution with gap " + str(round(opt.get_model_attr('MIPGap')*100,2))  + '%')
+    else:
+        st.success('Optimal Solution Found!')
 
     return model, results
 
 def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities, method: str, alpha:float = 0.8):
-    opt = SolverFactory("gurobi")
+    opt = SolverFactory("gurobi_persistent")
+    # opt.set_callback(my_callback)
 
     model = ConcreteModel()
 
@@ -171,12 +193,17 @@ def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities,
     model.capacity_Constraint = Constraint(model.N, range(num_scenarios), rule=capacity)
 
     start = time.time()
-    results = opt.solve(model,tee=True, options={'TimeLimit': 300})
+    opt.set_instance(model)
+    results = opt.solve(tee=True, options={'TimeLimit': 30})
     end  = time.time()
     logger.info('######################################################')
     logger.info('With ' + str(n) + ' points: '+ str(end-start) + 's')
     logger.info('######################################################')
 
+    if opt.get_model_attr('Status') != 2:
+        st.warning("Suboptimal Solution with gap " + str(round(opt.get_model_attr('MIPGap')*100,2))  + '%')
+    else:
+        st.success('Optimal Solution Found!')
     return model, results
 
 def feed_solution_variables(model, n, d, c):
