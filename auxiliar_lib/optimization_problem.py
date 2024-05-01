@@ -152,11 +152,10 @@ def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities,
             return model.PI[s] - sum(sum(model.x[i,j]*c[i-1][j-1] for j in model.N) for i in model.N) - sum((1-model.y[i])*d[s-1][i-1] for i in model.N) == 0
         model.costcv_cons_cons = Constraint(model.S, rule=of_cv_cons)
 
-
         #definition of OF per scenario
         def worst_case_cons(model,s):
             return sum(sum(model.x[i,j]*c[i-1][j-1] for j in model.N) for i in model.N) + sum((1-model.y[i])*d[s-1][i-1] for i in model.N) <= model.t
-        model.costcv_cons_cons = Constraint(model.S, rule=worst_case_cons)
+        model.worst_case_cons = Constraint(model.S, rule=worst_case_cons)
 
         def obj_expression(model): 
             return model.t
@@ -199,7 +198,7 @@ def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities,
     logger.info('######################################################')
     logger.info('With ' + str(n) + ' points: '+ str(end-start) + 's')
     logger.info('######################################################')
-
+    print(model.y[1].value)
     if opt.get_model_attr('Status') != 2:
         st.warning("Suboptimal Solution with gap " + str(round(opt.get_model_attr('MIPGap')*100,2))  + '%')
     else:

@@ -299,7 +299,7 @@ if "result" in st.session_state:
         # We convert into a hasheable in order to use the session
         tour_coords = [tuple(coord) for coord in result['tour_coords']]
         try:
-            i=a 
+            # i=a 
             if ('tour_coords' not in st.session_state) or (tour_coords != st.session_state['tour_coords']):
                 coordinates = here.calculate_route_HERE(tour_coords)
                 st.session_state['tour_coords'] = tour_coords
