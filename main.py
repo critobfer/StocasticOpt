@@ -60,9 +60,13 @@ def add_path(path, method):
 
     return output_directory
 
-def write_to_result_file(result_file_path, data):
-    with open(result_file_path, 'a') as file:
-        file.write(data + "\n")
+def write_to_result_file(result_file_path, data, first_information = False):
+    if first_information:
+        with open(result_file_path, 'w') as file:
+            file.write(data + "\n")
+    else:
+        with open(result_file_path, 'a') as file:
+            file.write(data + "\n")
 ####################################################################################################
 # AUXILIAR VARIABLES     ###########################################################################
 ####################################################################################################
@@ -252,7 +256,8 @@ if "result" in st.session_state:
                                                 result['capacity_used'] ,2)}')
     write_to_result_file(result_file_path, f'Objective Function: {round(result['total_distance'] +
                                             np.sum(result['nodes_demand']) - 
-                                                result['capacity_used'] ,2)}')
+                                                result['capacity_used'] ,2)}',
+                                                first_information=True)
 
     col1, col2= st.columns(2)
     with col1:
