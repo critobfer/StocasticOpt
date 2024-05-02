@@ -22,7 +22,7 @@ def my_callback(model, solver, where):
     # except Exception as e:
     #     a = 1
 
-def prize_collecting_TSP(n, c, d, D):
+def prize_collecting_TSP(n, c, d, D, cost_per_km , cost_per_no_del_demand):
 
     opt = SolverFactory("gurobi_persistent")
 
@@ -38,7 +38,7 @@ def prize_collecting_TSP(n, c, d, D):
 
     #Definition of the objective function
     def obj_expression(model): 
-        return sum(sum(model.x[i,j]*c[i-1][j-1] for j in model.N) for i in model.N) + sum((1-model.y[i])*d[i-1] for i in model.N)
+        return cost_per_km*sum(sum(model.x[i,j]*c[i-1][j-1] for j in model.N) for i in model.N) + cost_per_no_del_demand*sum((1-model.y[i])*d[i-1] for i in model.N)
     model.OBJ = Objective(rule=obj_expression, sense=minimize) 
 
     # Only once from i
@@ -88,7 +88,7 @@ def prize_collecting_TSP(n, c, d, D):
 
     return model, results
 
-def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities, method: str, alpha:float = 0.8):
+def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities, method: str, alpha: float, cost_per_km , cost_per_no_del_demand):
     opt = SolverFactory("gurobi_persistent")
     # opt.set_callback(my_callback)
 
@@ -113,7 +113,7 @@ def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities,
         model.PI = Var(model.S) #cvar auxiliary variable
         #definition of OF per scenario
         def of_cv_cons(model,s):
-            return model.PI[s] - sum(sum(model.x[i,j]*c[i-1][j-1] for j in model.N) for i in model.N) - sum((1-model.y[i])*d[s-1][i-1] for i in model.N) == 0
+            return model.PI[s] - cost_per_km*sum(sum(model.x[i,j]*c[i-1][j-1] for j in model.N) for i in model.N) - cost_per_no_del_demand*sum((1-model.y[i])*d[s-1][i-1] for i in model.N) == 0
         model.costcv_cons_cons = Constraint(model.S, rule=of_cv_cons)
 
         def obj_expression(model): 
@@ -137,7 +137,7 @@ def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities,
 
         #definition of OF per scenario
         def of_cv_cons(model,s):
-            return model.PI[s] - sum(sum(model.x[i,j]*c[i-1][j-1] for j in model.N) for i in model.N) - sum((1-model.y[i])*d[s-1][i-1] for i in model.N) == 0
+            return model.PI[s] - cost_per_km*sum(sum(model.x[i,j]*c[i-1][j-1] for j in model.N) for i in model.N) - cost_per_no_del_demand*sum((1-model.y[i])*d[s-1][i-1] for i in model.N) == 0
         model.costcv_cons_cons = Constraint(model.S, rule=of_cv_cons)
 
         def obj_expression(model):
@@ -149,7 +149,7 @@ def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities,
         model.PI = Var(model.S) #cvar auxiliary variable
         #definition of OF per scenario
         def of_cv_cons(model,s):
-            return model.PI[s] - sum(sum(model.x[i,j]*c[i-1][j-1] for j in model.N) for i in model.N) - sum((1-model.y[i])*d[s-1][i-1] for i in model.N) == 0
+            return model.PI[s] - cost_per_km*sum(sum(model.x[i,j]*c[i-1][j-1] for j in model.N) for i in model.N) - cost_per_no_del_demand*sum((1-model.y[i])*d[s-1][i-1] for i in model.N) == 0
         model.costcv_cons_cons = Constraint(model.S, rule=of_cv_cons)
 
         #definition of OF per scenario

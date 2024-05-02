@@ -6,7 +6,7 @@ import streamlit as st
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-def read_data(nodeData, demandData):
+def read_data(nodeData, demandData, capacity_per_client):
     # DATA GENERATION
     points_ids = nodeData['codnode'].values
     n = len(points_ids)
@@ -26,7 +26,7 @@ def read_data(nodeData, demandData):
         i+=1
 
     # Cost matrix, in this case distance
-    D = 150*n
+    D = capacity_per_client*n
     c = [[0] * n for _ in range(n)]
     for i in range(n):
         for j in range(n):
@@ -38,11 +38,11 @@ def read_data(nodeData, demandData):
 
     return points_ids, c, d, D, latitudes, longitudes
 
-def execute(nodeData, realDemand, demandData):
+def execute(nodeData, realDemand, demandData, capacity_per_client, cost_per_km , cost_per_no_del_demand):
     num_nodos = len(nodeData)
-    codnodes, c, d, D, latitudes, longitudes= read_data(nodeData, realDemand)
+    codnodes, c, d, D, latitudes, longitudes= read_data(nodeData, realDemand, capacity_per_client)
     st.write('Running optimization...')
-    model, results = op.prize_collecting_TSP(num_nodos, c, d, D)
+    model, results = op.prize_collecting_TSP(num_nodos, c, d, D, cost_per_km , cost_per_no_del_demand)
     x_sol, y_sol, u_sol, capacity_used, opt_value, total_distance = op.feed_solution_variables(model, num_nodos, d, c)
     codnodes_achived = [codnodes[i] for i in range(num_nodos) if y_sol[i] == 1]
     tour_coords = op.get_tour_cord(x_sol, latitudes, longitudes, num_nodos)

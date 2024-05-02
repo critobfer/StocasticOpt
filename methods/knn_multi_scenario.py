@@ -7,7 +7,7 @@ import streamlit as st
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-def generate_data_scenarios(k, nodeData, demandData, realDemand):
+def generate_data_scenarios(k, nodeData, demandData, realDemand, capacity_per_client):
     # CLEAN THE DATE
     demandData = demandData.drop(['Date', 'Year', 'Holiday'], axis=1)
     realDemand = realDemand.drop(['Date', 'Year', 'Holiday'], axis=1)
@@ -41,7 +41,7 @@ def generate_data_scenarios(k, nodeData, demandData, realDemand):
         i+=1
         my_bar.progress(i/n, text=progress_text)
     # Cost matrix, in this case distance
-    D = 150*n
+    D = capacity_per_client*n
     c = [[0] * n for _ in range(n)]
     for i in range(n):
         for j in range(n):
@@ -53,16 +53,16 @@ def generate_data_scenarios(k, nodeData, demandData, realDemand):
 
     return points_ids, c, d, D, latitudes, longitudes, min_max_dist
 
-def execute(k, option, nodeData, demandData, realDemand, alpha):
+def execute(k, option, nodeData, demandData, realDemand, alpha, capacity_per_client, cost_per_km , cost_per_no_del_demand):
     num_nodos = len(nodeData)
     st.write("Generating scenarios...")
-    codnodes, c, d, D, latitudes, longitudes, min_max_dist = generate_data_scenarios(k, nodeData, demandData, realDemand)
+    codnodes, c, d, D, latitudes, longitudes, min_max_dist = generate_data_scenarios(k, nodeData, demandData, realDemand, capacity_per_client)
     # The first scenario has more probaility
     weight = [1 / i for i in range(1, k + 1)]
     total = sum(weight)
     prob = [w / total for w in weight] # To sum up 1
     st.write('Running optimization...')
-    model, _ = op.prize_collecting_TSP_multiscenario(num_nodos, c, d, D, k, prob, option, alpha=alpha)
+    model, _ = op.prize_collecting_TSP_multiscenario(num_nodos, c, d, D, k, prob, option, alpha, cost_per_km , cost_per_no_del_demand)
     real_d = realDemand['Pallets'].values
     x_sol, y_sol, _, capacity_used, opt_value, total_distance = op.feed_solution_variables(model, num_nodos, real_d, c)
     codnodes_achived = [codnodes[i] for i in range(num_nodos) if y_sol[i] == 1]

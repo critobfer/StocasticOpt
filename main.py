@@ -125,21 +125,31 @@ if demandData is not None:
 ###################################################################################################
 # SELECT DATE            ##########################################################################
 ###################################################################################################
-st.sidebar.subheader('Day we want to solve', divider='red')
-if demandData is not None:
-    year = st.sidebar.selectbox('Select the year', options=[2023, 2024])
-    if year == 2023:
-        months = [month_dict[i] for i in list(demandData[demandData['Year'] == year]
-                                            ['Month'].sort_values()) if i >= 7]
-    else:
-        months = [month_dict[i] for i in list(demandData[demandData['Year'] == year]
-                                    ['Month'].sort_values())]
+st.subheader('💶  Cost', divider='red')
+capacity_per_client = 300
+col1, col2= st.columns(2)
+with col1:
+    cost_per_km = st.number_input("Set cost per km", value=1.0)
+with col2:
+    cost_per_no_del_demand = st.number_input("Set cost per no delivered demand", value = 0.3)
 
-    month_name = st.sidebar.select_slider('Select the month', options=months)
+st.subheader('📆 Day we want to solve', divider='red')
+col1, col2, col3= st.columns(3)
+if demandData is not None:
+    with col1:
+        year = st.selectbox('Select the year', options=[2023, 2024])
+    unique_months = sorted(demandData[demandData['Year'] == year]['Month'].unique())
+    if year == 2023:
+        months = [month_dict[i] for i in unique_months if i >= 7]
+    else:
+        months = [month_dict[i] for i in unique_months]
+    with col2:
+        month_name = st.selectbox('Select the month', options=months)
     month = month_dict_reversed[month_name]
-    days = list(demandData[(demandData['Year'] == year) & (demandData['Month'] == month)]
-                ['Day'].sort_values())
-    day = st.sidebar.select_slider('Select the day', options=days)
+    days = set(list(list(demandData[(demandData['Year'] == year) & (demandData['Month'] == month)]
+                ['Day'].sort_values())))
+    with col3:
+        day = st.selectbox('Select the day', options=days)
     date = datetime(year, month, day)
 
 ###################################################################################################
@@ -203,7 +213,8 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
     if method == 'Deterministic':
         with st.status('Executing', expanded=True) as status:
             result = det.execute(nodeData=nodeDataSelected, realDemand=realDemand, 
-                                demandData=demandDataSelected) 
+                                demandData=demandDataSelected, capacity_per_client = capacity_per_client,
+                                cost_per_km = cost_per_km, cost_per_no_del_demand = cost_per_no_del_demand) 
             status.update(label="Executed!", state="complete", expanded=False)
         # st.empty()
         st.session_state["result"] = result
@@ -211,7 +222,8 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
         with st.status('Executing', expanded=True) as status:
             result = ms.execute(num_scenarios=num_scenarios, option=ms_option, 
                                 nodeData=nodeDataSelected, demandData=demandDataSelected, 
-                                realDemand=realDemand, alpha = alpha)
+                                realDemand=realDemand, alpha = alpha, capacity_per_client = capacity_per_client,
+                                cost_per_km = cost_per_km, cost_per_no_del_demand = cost_per_no_del_demand)
             status.update(label="Executed!", state="complete", expanded=False) 
         # st.empty()
         st.session_state["result"] = result
@@ -219,7 +231,8 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
         with st.status('Executing', expanded=True) as status:
             result = kms.execute(k=k, option=ms_option,
                                 nodeData=nodeDataSelected, demandData=demandDataSelected, 
-                                realDemand=realDemand, alpha = alpha) 
+                                realDemand=realDemand, alpha = alpha, capacity_per_client = capacity_per_client,
+                                cost_per_km = cost_per_km, cost_per_no_del_demand = cost_per_no_del_demand) 
             status.update(label="Executed!", state="complete", expanded=False)
         # st.empty()
         st.session_state["result"] = result
@@ -227,7 +240,8 @@ if st.sidebar.button('Solve', type='primary', use_container_width=True ):
         with st.status('Executing', expanded=True) as status:
             result = ml.execute(option=ml_option, nodeData=nodeDataSelected, 
                                 demandData=demandDataSelected,
-                                realDemand=realDemand)
+                                realDemand=realDemand, capacity_per_client = capacity_per_client,
+                                cost_per_km = cost_per_km, cost_per_no_del_demand = cost_per_no_del_demand)
             status.update(label="Executed!", state="complete", expanded=False) 
         # st.empty()
         st.session_state["result"] = result
@@ -251,12 +265,12 @@ if "result" in st.session_state:
     # OBJECTIVE FUNCTION    ###########################################################################
     ###################################################################################################
     # Show Objective Function
-    st.subheader(f'**Objective Function:** {round(result['total_distance'] +
-                                            np.sum(result['nodes_demand']) - 
-                                                result['capacity_used'] ,2)}')
-    write_to_result_file(result_file_path, f'Objective Function: {round(result['total_distance'] +
-                                            np.sum(result['nodes_demand']) - 
-                                                result['capacity_used'] ,2)}',
+    st.subheader(f'**Total Cost:** {round(cost_per_km*result['total_distance'] +
+                                            cost_per_no_del_demand*(np.sum(result['nodes_demand']) - 
+                                                result['capacity_used']) ,2)} €')
+    write_to_result_file(result_file_path, f'Objective Function: {round(cost_per_km*result['total_distance'] +
+                                            cost_per_no_del_demand*(np.sum(result['nodes_demand']) - 
+                                                result['capacity_used']) ,2)}',
                                                 first_information=True)
 
     col1, col2= st.columns(2)

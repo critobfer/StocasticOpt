@@ -8,7 +8,7 @@ import streamlit as st
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-def generate_data_scenarios(num_scenarios, nodeData, demandData):
+def generate_data_scenarios(num_scenarios, nodeData, demandData, capacity_per_client):
     np.random.seed(100513471)
 
     # DATA GENERATION
@@ -44,7 +44,7 @@ def generate_data_scenarios(num_scenarios, nodeData, demandData):
         my_bar.progress(i/n, text=progress_text)
 
     # Cost matrix, in this case distance
-    D = 150*n
+    D = capacity_per_client*n
     c = [[0] * n for _ in range(n)]
     for i in range(n):
         for j in range(n):
@@ -62,13 +62,13 @@ def get_scenarios_OF_value(model, num_scenarios):
         of_values[s] = model.PI[s+1].value
     return of_values
 
-def execute(num_scenarios, option, nodeData, demandData, realDemand, alpha):
+def execute(num_scenarios, option, nodeData, demandData, realDemand, alpha, capacity_per_client, cost_per_km , cost_per_no_del_demand):
     num_nodos = len(nodeData)
     st.write("Generating scenarios...")
-    codnodes, c, d, D, latitudes, longitudes, params_simulation= generate_data_scenarios(num_scenarios, nodeData, demandData)
+    codnodes, c, d, D, latitudes, longitudes, params_simulation= generate_data_scenarios(num_scenarios, nodeData, demandData, capacity_per_client)
     prob = [1/num_scenarios for _ in range(num_scenarios)]
     st.write('Running optimization...')
-    model, _ = op.prize_collecting_TSP_multiscenario(num_nodos, c, d, D, num_scenarios, prob, option, alpha=alpha)
+    model, _ = op.prize_collecting_TSP_multiscenario(num_nodos, c, d, D, num_scenarios, prob, option, alpha, cost_per_km , cost_per_no_del_demand)
     real_d = realDemand['Pallets'].values
     of_values = get_scenarios_OF_value(model, num_scenarios)
     x_sol, y_sol, u_sol, capacity_used, opt_value, total_distance = op.feed_solution_variables(model, num_nodos, real_d, c)

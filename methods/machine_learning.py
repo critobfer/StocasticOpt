@@ -10,7 +10,7 @@ import streamlit as st
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-def predict_demand(nodeData, demandData, realDemand, method):
+def predict_demand(nodeData, demandData, realDemand, method, capacity_per_client):
     np.random.seed(100513471)
     # CLEAN THE DATE
     demandData = demandData.drop(['Date', 'Year', 'Holiday'], axis=1)
@@ -64,7 +64,7 @@ def predict_demand(nodeData, demandData, realDemand, method):
 
 
     # Cost matrix, in this case distance
-    D = 150*n
+    D = capacity_per_client*n
     c = [[0] * n for _ in range(n)]
     for i in range(n):
         for j in range(n):
@@ -77,12 +77,12 @@ def predict_demand(nodeData, demandData, realDemand, method):
     return points_ids, c, d, D, latitudes, longitudes, n_train, model_resutls
 
 
-def execute(option, nodeData, demandData, realDemand):
+def execute(option, nodeData, demandData, realDemand, capacity_per_client, cost_per_km , cost_per_no_del_demand):
     num_nodos = len(nodeData)
     st.write("Predicting demand...")
-    codnodes, c, d, D, latitudes, longitudes, n_train, model_resutls = predict_demand(nodeData, demandData, realDemand, option)
+    codnodes, c, d, D, latitudes, longitudes, n_train, model_resutls = predict_demand(nodeData, demandData, realDemand, option, capacity_per_client)
     st.write('Running optimization...')
-    model, _ = op.prize_collecting_TSP(num_nodos, c, d, D)
+    model, _ = op.prize_collecting_TSP(num_nodos, c, d, D, cost_per_km , cost_per_no_del_demand)
     real_d = realDemand['Pallets'].values
     x_sol, y_sol, _, capacity_used, opt_value, total_distance = op.feed_solution_variables(model, num_nodos, real_d, c)
     codnodes_achived = [codnodes[i] for i in range(num_nodos) if y_sol[i] == 1]
