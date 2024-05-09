@@ -413,7 +413,13 @@ if "result" in st.session_state:
         plt.hist(result['objective_function_value_multiscenario'], color='#ff4b4b', bins=15)
         plt.xlabel('OF values')
         plt.ylabel('num scenarios')
-        plt.title('Histogram OF values' + result['title'])
+        
+        if result['tita'] != None:
+            plt.title('Histogram OF values' + result['title'] + ' with tita ' + str(round(result['tita'], 2)))
+            plt.axvline(x=result['tita'] , color='black', linestyle='--')
+        else:
+            plt.title('Histogram OF values' + result['title'])
+
         plt.savefig(os.path.join(st.session_state["path_method"], 'hist' + result['info'] + '.svg'))
         st.pyplot()
         

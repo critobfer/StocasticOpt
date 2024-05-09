@@ -76,7 +76,7 @@ def prize_collecting_TSP(n, c, d, D, cost_per_km , cost_per_no_del_demand):
     opt.set_instance(model)
     # opt.set_callback(my_callback)
 
-    results = opt.solve(tee=True, options={'TimeLimit': 30})
+    results = opt.solve(tee=True, options={'TimeLimit': 60})
     end  = time.time()
     logger.info('######################################################')
     logger.info('With ' + str(n) + ' points: '+ str(end-start) + 's')
@@ -193,7 +193,7 @@ def prize_collecting_TSP_multiscenario(n, c, d, D, num_scenarios, probabilities,
 
     start = time.time()
     opt.set_instance(model)
-    results = opt.solve(tee=True, options={'TimeLimit': 30})
+    results = opt.solve(tee=True, options={'TimeLimit': 60})
     end  = time.time()
     logger.info('######################################################')
     logger.info('With ' + str(n) + ' points: '+ str(end-start) + 's')

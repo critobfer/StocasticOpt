@@ -70,6 +70,10 @@ def execute(num_scenarios, option, nodeData, demandData, realDemand, alpha, capa
     st.write('Running optimization...')
     model, _ = op.prize_collecting_TSP_multiscenario(num_nodos, c, d, D, num_scenarios, prob, option, alpha, cost_per_km , cost_per_no_del_demand)
     real_d = realDemand['Pallets'].values
+    if option == 'Conditional Value at Risk (CVaR)':
+        tita = model.tita.value
+    else:
+        tita = None
     of_values = get_scenarios_OF_value(model, num_scenarios)
     x_sol, y_sol, u_sol, capacity_used, opt_value, total_distance = op.feed_solution_variables(model, num_nodos, real_d, c)
     codnodes_achived = [codnodes[i] for i in range(num_nodos) if y_sol[i] == 1]
@@ -99,7 +103,8 @@ def execute(num_scenarios, option, nodeData, demandData, realDemand, alpha, capa
         'nodeDataSelected': nodeData,
         'demandDataSelected': demandData,
         'info': '_numsc_'+str(num_scenarios)+'_option_'+str(option)+extra_info,
-        'title':title
+        'title':title,
+        'tita':tita
     }
 
     return result
