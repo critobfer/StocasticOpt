@@ -118,7 +118,7 @@ if nodeData is not None:
 
 demandData = pd.read_csv(demandData_github_link, sep=';', encoding='latin-1') 
 if demandData is not None:
-    demandData['Date'] = pd.to_datetime(demandData['Date'])
+    demandData['Date'] = pd.to_datetime(demandData['Date'], format="%d/%m/%Y",)
 
     st.session_state["demandData"] = demandData
 
