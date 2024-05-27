@@ -265,13 +265,17 @@ if "result" in st.session_state:
     # OBJECTIVE FUNCTION    ###########################################################################
     ###################################################################################################
     # Show Objective Function
-    # st.subheader(f'**Total Cost:** {round(cost_per_km*result["total_distance"] +
-    #                                         cost_per_no_del_demand*(np.sum(result["nodes_demand"]) - 
-    #                                             result["capacity_used"]) ,2)} €')
-    write_to_result_file(result_file_path, f'Objective Function: {round(cost_per_km*result["total_distance"] +
-                                            cost_per_no_del_demand*(np.sum(result["nodes_demand"]) - 
-                                                result["capacity_used"]) ,2)}',
-                                                first_information=True)
+    total_distance = result["total_distance"]
+    nodes_demand_sum = np.sum(result["nodes_demand"])
+    capacity_used = result["capacity_used"]
+    total_cost = round(cost_per_km * total_distance + cost_per_no_del_demand * (nodes_demand_sum - capacity_used), 2)
+
+    # Mostrar en la aplicación de Streamlit usando concatenación de strings
+    st.subheader("**Total Cost:** " + str(total_cost) + " €")
+
+    # Escribir en el archivo de resultados usando concatenación de strings
+    objective_function_text = "Objective Function: " + str(total_cost)
+    write_to_result_file(result_file_path, objective_function_text, first_information=True)
 
     col1, col2= st.columns(2)
     with col1:
