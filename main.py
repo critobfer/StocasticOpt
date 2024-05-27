@@ -171,7 +171,7 @@ if method == 'Multi-scenario':
                                                 'Conditional Value at Risk (CVaR)', 
                                                 'Worst Case Analysis'])
     if ms_option == 'Conditional Value at Risk (CVaR)':
-        alpha = st.sidebar.slider("Choose alpha ", min_value=0.0, max_value=1.0, step=0.05, value=0.8)
+        alpha = st.sidebar.slider("Choose alpha ", min_value=0.0, max_value=0.95, step=0.05, value=0.8)
     else:
         alpha = 0
 elif method == 'KNN Multi-scenario':
@@ -180,7 +180,7 @@ elif method == 'KNN Multi-scenario':
                                                 'Conditional Value at Risk (CVaR)', 
                                                 'Worst Case Analysis'])
     if ms_option == 'Conditional Value at Risk (CVaR)':
-        alpha = st.sidebar.slider("Choose alpha ", min_value=0.0, max_value=1.0, step=0.05, value=0.8)
+        alpha = st.sidebar.slider("Choose alpha ", min_value=0.0, max_value=0.95, step=0.05, value=0.8)
     else:
         alpha = 0
 elif method == 'Machine Learning':
@@ -325,7 +325,6 @@ if "result" in st.session_state:
         # We convert into a hasheable in order to use the session
         tour_coords = [tuple(coord) for coord in result['tour_coords']]
         try:
-            # i=a 
             if ('tour_coords' not in st.session_state) or (tour_coords != st.session_state['tour_coords']):
                 coordinates = here.calculate_route_HERE(tour_coords)
                 st.session_state['tour_coords'] = tour_coords
