@@ -430,7 +430,7 @@ if "result" in st.session_state:
         st.pyplot()
         
     elif 'k' in  result.keys():
-        st.header('Simulation info for' + str(result['k']) + ' Nearest Neighbour:', divider='red')
+        st.header('Simulation info for ' + str(result['k']) + ' Nearest Neighbour:', divider='red')
         d_ms = result['nodes_demand_multiscenario']
         min_max_dist = result['min_max_dist']
         combined_data = []
