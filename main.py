@@ -269,6 +269,7 @@ if "result" in st.session_state:
     nodes_demand_sum = np.sum(result["nodes_demand"])
     capacity_used = result["capacity_used"]
     total_cost = round(cost_per_km * total_distance + cost_per_no_del_demand * (nodes_demand_sum - capacity_used), 2)
+    optimum_value = result["optimum_value"]
 
     # Mostrar en la aplicación de Streamlit usando concatenación de strings
     st.subheader("**Total Cost:** " + str(total_cost) + " €")
@@ -277,17 +278,19 @@ if "result" in st.session_state:
     objective_function_text = "Objective Function: " + str(total_cost)
     write_to_result_file(result_file_path, objective_function_text, first_information=True)
 
-    col1, col2= st.columns(2)
+    col1, col2 = st.columns(2)
+
     with col1:
-        st.metric("Distance travelled", f'{round(result['total_distance'],2)}Km', "")
-        write_to_result_file(result_file_path, f'Distance travelled: {round(result['total_distance'],2)}Km')
+        st.metric("Distance travelled", str(round(total_distance, 2)) + " Km", "")
+        write_to_result_file(result_file_path, "Distance travelled: " + str(round(total_distance, 2)) + " Km")
+
     with col2:
-        st.metric("Undelivered demand", f'{round(np.sum(result['nodes_demand'])
-                                            - result['capacity_used'] ,2)} Pallets', "")
-        write_to_result_file(result_file_path, f'Undelivered demand: {round(np.sum(result['nodes_demand'])
-                                            - result['capacity_used'] ,2)} Pallets')
-    st.markdown(f'***Method Objective function:*** {round(result['optimum_value'],2)}')
-    write_to_result_file(result_file_path, f'Method Objective function: {round(result['optimum_value'],2)}')
+        undelivered_demand = round(nodes_demand_sum - capacity_used, 2)
+        st.metric("Undelivered demand", str(undelivered_demand) + " Pallets", "")
+        write_to_result_file(result_file_path, "Undelivered demand: " + str(undelivered_demand) + " Pallets")
+
+    st.markdown("***Method Objective function:*** " + str(round(optimum_value, 2)))
+    write_to_result_file(result_file_path, "Method Objective function: " + str(round(optimum_value, 2)))
 
     ###################################################################################################
     # MAP                   ###########################################################################
