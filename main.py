@@ -345,19 +345,19 @@ if "result" in st.session_state:
     ###################################################################################################
     if 'nodes_predicted_demand' in result.keys():
         st.header('Prediction info for ' + str(result['method'])+ ':', divider='red')
-        write_to_result_file(result_file_path, f'Method Objective function: {round(result['optimum_value'],2)}')
+        write_to_result_file(result_file_path, 'Method Objective function:'+ str(round(result['optimum_value'],2)))
 
 
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.markdown(f' 📈 MSE: **{round(result["MSE"], 2)}**')
-            write_to_result_file(result_file_path, f' MSE: {round(result["MSE"], 2)}')
+            st.markdown(" 📈 MSE: **" + str(round(result["MSE"], 2)) + "**")
+            write_to_result_file(result_file_path, " MSE: " + str(round(result["MSE"], 2)))
         with col2:
-            st.markdown(f' 📈 R2: **{round(result["R2"], 2)}**')
-            write_to_result_file(result_file_path, f' R2: {round(result["R2"], 2)}')
+            st.markdown(" 📈 R2: **" + str(round(result["R2"], 2)) + "**")
+            write_to_result_file(result_file_path, " R2: " + str(round(result["R2"], 2)))
         with col3:
-            st.markdown(f' 📈 MAE: **{round(result["MAE"], 2)}**')
-            write_to_result_file(result_file_path, f' MAE: {round(result["MAE"], 2)}')
+            st.markdown(" 📈 MAE: **" + str(round(result["MAE"], 2)) + "**")
+            write_to_result_file(result_file_path, " MAE: " + str(round(result["MAE"], 2)))
         combined_data = []
         combined_data.append(('Real Demand',) + tuple(result['nodes_demand']))
         combined_data.append(('Predicted Demand',) + tuple(result['nodes_predicted_demand']))
@@ -431,7 +431,7 @@ if "result" in st.session_state:
         st.pyplot()
         
     elif 'k' in  result.keys():
-        st.header(f'Simulation info for {result['k']} Nearest Neighbour:', divider='red')
+        st.header('Simulation info for' + str(result['k']) + ' Nearest Neighbour:', divider='red')
         d_ms = result['nodes_demand_multiscenario']
         min_max_dist = result['min_max_dist']
         combined_data = []
@@ -466,25 +466,23 @@ if "result" in st.session_state:
     # STADISTICS                #####################################################################
     #################################################################################################
 
+    percentage_clients_delivered = (result['num_visited'] / result['num_nodes']) * 100
+    percentage_delivered = (result['capacity_used'] / np.sum(result['nodes_demand'])) * 100
+    percentage_truck_filling = (result['capacity_used'] / result['total_capacity']) * 100
+
+    # Mostrar en Streamlit usando concatenación de strings
     st.header('Stadistics:', divider='red')
     write_to_result_file(result_file_path, 'Stadistics:')
 
-    st.markdown(f'🚚 Truck with a capacity of **{result['total_capacity']}** doing a distance of **{round(
-        result['total_distance'],2)} Km**')
-    write_to_result_file(result_file_path, f'Truck with a capacity of {result['total_capacity']} doing a distance of {round(
-        result['total_distance'],2)} Km')
-    st.markdown(f'**{result['num_visited']}** points have been visited using **{round(
-        result['capacity_used'], 2)}** capacity unit')
-    write_to_result_file(result_file_path, f'{result['num_visited']} points have been visited using {round(
-        result['capacity_used'], 2)} capacity unit')
+    st.markdown("🚚 Truck with a capacity of **" + str(result['total_capacity']) + "** doing a distance of **" + str(round(result['total_distance'],2)) + " Km**")
+    write_to_result_file(result_file_path, "Truck with a capacity of " + str(result['total_capacity']) + " doing a distance of " + str(round(result['total_distance'],2)) + " Km")
 
-    # Compute percentages
-    percentage_clients_delivered = (result['num_visited'] / result['num_nodes']) * 100
-    write_to_result_file(result_file_path, f'Percentage Clients Delivered: {percentage_clients_delivered}%')
-    percentage_delivered = (result['capacity_used'] / np.sum(result['nodes_demand'])) * 100
-    write_to_result_file(result_file_path, f'Percentage Demand Delivered: {percentage_delivered}%')
-    percentage_truck_filling = (result['capacity_used'] / result['total_capacity']) * 100
-    write_to_result_file(result_file_path, f'Percentage Truck Filling: {percentage_truck_filling}%')
+    st.markdown("**" + str(result['num_visited']) + "** points have been visited using **" + str(round(result['capacity_used'], 2)) + "** capacity unit")
+    write_to_result_file(result_file_path, str(result['num_visited']) + " points have been visited using " + str(round(result['capacity_used'], 2)) + " capacity unit")
+
+    write_to_result_file(result_file_path, "Percentage Clients Delivered: " + str(round(percentage_clients_delivered, 2)) + "%")
+    write_to_result_file(result_file_path, "Percentage Demand Delivered: " + str(round(percentage_delivered, 2)) + "%")
+    write_to_result_file(result_file_path, "Percentage Truck Filling: " + str(round(percentage_truck_filling, 2)) + "%")
 
     # Show Compute percentages
     chart_data = pd.DataFrame(
