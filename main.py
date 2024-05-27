@@ -265,9 +265,9 @@ if "result" in st.session_state:
     # OBJECTIVE FUNCTION    ###########################################################################
     ###################################################################################################
     # Show Objective Function
-    st.subheader(f'**Total Cost:** {round(cost_per_km*result["total_distance"] +
-                                            cost_per_no_del_demand*(np.sum(result["nodes_demand"]) - 
-                                                result["capacity_used"]) ,2)} €')
+    # st.subheader(f'**Total Cost:** {round(cost_per_km*result["total_distance"] +
+    #                                         cost_per_no_del_demand*(np.sum(result["nodes_demand"]) - 
+    #                                             result["capacity_used"]) ,2)} €')
     write_to_result_file(result_file_path, f'Objective Function: {round(cost_per_km*result["total_distance"] +
                                             cost_per_no_del_demand*(np.sum(result["nodes_demand"]) - 
                                                 result["capacity_used"]) ,2)}',
