@@ -426,7 +426,7 @@ if "result" in st.session_state:
             plt.title('Histogram OF values' + result['title'])
             plt.axvline(x=FO_mean, color='orange', linestyle='-', label=f'Average OF value: {round(FO_mean, 1)}')
             plt.axvline(x=FO_worst, color='red', linestyle='-', label=f'Worst OF value: {round(FO_worst, 1)}')
-            plt.axvline(x=result['tita'], color='black', linestyle='--', label=f'ξ = {round(result['tita'], 1)}')
+            plt.axvline(x=result['tita'], color='black', linestyle='--', label='ξ = ' + str(round(result['tita'], 1)))
 
             plt.legend()
         else:
