@@ -171,7 +171,7 @@ if method == 'Multi-scenario':
                                                 'Conditional Value at Risk (CVaR)', 
                                                 'Worst Case Analysis'])
     if ms_option == 'Conditional Value at Risk (CVaR)':
-        alpha = st.sidebar.slider("Choose alpha ", min_value=0.0, max_value=0.95, step=0.05, value=0.8)
+        alpha = st.sidebar.slider("Choose α ", min_value=0.0, max_value=0.95, step=0.05, value=0.8)
     else:
         alpha = 0
 elif method == 'KNN Multi-scenario':
@@ -180,7 +180,7 @@ elif method == 'KNN Multi-scenario':
                                                 'Conditional Value at Risk (CVaR)', 
                                                 'Worst Case Analysis'])
     if ms_option == 'Conditional Value at Risk (CVaR)':
-        alpha = st.sidebar.slider("Choose alpha ", min_value=0.0, max_value=0.95, step=0.05, value=0.8)
+        alpha = st.sidebar.slider("Choose α ", min_value=0.0, max_value=0.95, step=0.05, value=0.8)
     else:
         alpha = 0
 elif method == 'Machine Learning':
@@ -416,13 +416,19 @@ if "result" in st.session_state:
         ###################################################################################################
         plt.style.use('ggplot')
         plt.figure(figsize=(8, 4))
+        FO_mean = round(np.mean(result['objective_function_value_multiscenario']), 2)
+        FO_worst = round(np.max(result['objective_function_value_multiscenario']), 2)
         plt.hist(result['objective_function_value_multiscenario'], color='#ff4b4b', bins=15)
         plt.xlabel('OF values')
         plt.ylabel('num scenarios')
         
         if result['tita'] != None:
-            plt.title('Histogram OF values' + result['title'] + ' with tita ' + str(round(result['tita'], 2)))
-            plt.axvline(x=result['tita'] , color='black', linestyle='--')
+            plt.title('Histogram OF values' + result['title'])
+            plt.axvline(x=FO_mean, color='orange', linestyle='-', label=f'Average OF value: {round(FO_mean, 1)}')
+            plt.axvline(x=FO_worst, color='red', linestyle='-', label=f'Worst OF value: {round(FO_worst, 1)}')
+            plt.axvline(x=result['tita'], color='black', linestyle='--', label=f'ξ = {round(result['tita'], 1)}')
+
+            plt.legend()
         else:
             plt.title('Histogram OF values' + result['title'])
 

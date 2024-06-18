@@ -80,7 +80,7 @@ def execute(num_scenarios, option, nodeData, demandData, realDemand, alpha, capa
     tour_coords = op.get_tour_cord(x_sol, latitudes, longitudes, num_nodos)
     if option == 'Conditional Value at Risk (CVaR)':
         extra_info = '_alpha_'+str(alpha)
-        title = ' with alpha '+str(alpha) 
+        title = ' with α = '+str(alpha) 
     else:
         extra_info = ''
         title = ''
