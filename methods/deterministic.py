@@ -9,8 +9,7 @@ logger.setLevel(logging.INFO)
 try:
     import auxiliar_lib.optimization_problem as op
 except ImportError as e:
-    logger.error("Error importing optimization_problem: %s", e)
-    raise
+    raise e
 
 def read_data(nodeData, demandData, capacity_per_client):
     # DATA GENERATION
