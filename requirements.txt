@@ -54,7 +54,7 @@ more-itertools
 multimethod
 nest-asyncio
 networkx
-numpy==1.23.5
+numpy
 packaging
 pandas
 pandas-profiling
@@ -75,7 +75,7 @@ pydantic_core
 pydeck
 Pygments
 pymdown-extensions
-Pyomo
+Pyomo==6.6.1
 pyparsing
 python-dateutil
 python-dotenv
