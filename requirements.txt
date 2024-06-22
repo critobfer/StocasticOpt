@@ -90,6 +90,7 @@ scikit-learn
 scipy
 seaborn
 six
+pyutilib
 smmap
 soupsieve
 st-annotated-text
