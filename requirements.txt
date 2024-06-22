@@ -54,7 +54,7 @@ more-itertools
 multimethod
 nest-asyncio
 networkx
-numpy==1.19.5
+numpy==1.23.5
 packaging
 pandas
 pandas-profiling
