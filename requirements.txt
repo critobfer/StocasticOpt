@@ -74,7 +74,7 @@ pydantic-settings
 pydeck
 Pygments
 pymdown-extensions
-Pyomo==6.7.1
+Pyomo
 pyparsing
 python-dateutil
 python-dotenv
