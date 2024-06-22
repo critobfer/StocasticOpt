@@ -1,15 +1,10 @@
 from geopy.distance import geodesic
 import logging
-# import auxiliar_lib.optimization_problem as op
+import auxiliar_lib.optimization_problem as op
 import streamlit as st
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
-try:
-    import auxiliar_lib.optimization_problem as op
-except ImportError as e:
-    raise e
 
 def read_data(nodeData, demandData, capacity_per_client):
     # DATA GENERATION
