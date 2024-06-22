@@ -98,4 +98,5 @@ tqdm
 traitlets
 typing-extensions
 tzdata
+pipdeptree
 xgboost
