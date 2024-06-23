@@ -61,7 +61,7 @@ pandas-profiling==3.2.0
 parso==0.8.3
 phik==0.12.4
 pillow==10.2.0
-pip
+pip==24.1
 pipdeptree==2.23.0
 platformdirs==4.2.0
 ply==3.11
