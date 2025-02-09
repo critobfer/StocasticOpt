@@ -95,7 +95,7 @@ smmap
 soupsieve
 st-annotated-text
 stack-data
-streamlit
+streamlit ~= 1.32.2
 streamlit-camera-input-live
 streamlit-card
 streamlit-embedcode
